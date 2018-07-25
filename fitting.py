@@ -10,9 +10,9 @@ from scipy import odr
 ### Main fitting function, calls one of the 2 possible ones based on case
 def fit(val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False, case='lsq'):
 	if(case=='lsq'):
-		return fit_lsq (val_x, val_y, val_y2d_err=None, output=False)
+		return fit_lsq (val_x, val_y, val_y2d_err=None, outp=output)
 	elif(case=='odr'):
-		 return fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False)
+		 return fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=output)
 	else:
 		print 'Error in fitting function call!'
 		quit()
@@ -20,7 +20,7 @@ def fit(val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False, case='ls
 ###Fitting function with x and y errors see Python Scipy ODR
 ### fits a *x +b =y
 ### needs x and y values as list or array
-def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False):
+def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=False):
 	val_log_x = []
 	val_log_y = []
 	for i in range(len(val_x)):
@@ -35,7 +35,7 @@ def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False):
 	
 	myodr = odr.odr(fct_odr, [1.,0.], val_log_y, val_log_x, full_output=1)
 	outodr = odr.Output(myodr)
-	if(output == True):
+	if(outp == True):
 		print '########## FIT RESULTS ###########'
 		print 'a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0]
 		print 'b =\t','%0.3f' %  outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1]
@@ -44,7 +44,7 @@ def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False):
 	return outodr.beta[0], outodr.sd_beta[0], outodr.beta[1] , outodr.sd_beta[1], outodr.sum_square
 
 ### 2nd Fitting function, this one cannot deal with x-errors, uses LM algorithm
-def fit_lsq (val_x, val_y, val_y2d_err=None, output=False):
+def fit_lsq (val_x, val_y, val_y2d_err=None, outp=False):
 	val_log_x = []
 	val_log_y = []
 	for i in range(len(val_x)):
@@ -64,7 +64,7 @@ def fit_lsq (val_x, val_y, val_y2d_err=None, output=False):
 	for i in range(len(val_log_x)):
 		chisq += m.pow( fct_lsq(val_log_x[i], popt[0], popt[1]) - val_log_y[i] ,2)
 	
-	if(output == True):
+	if(outp == True):
 		print '########## FIT RESULTS ###########'
 		print 'a =\t', '%0.3f' % popt[0], '+/-\t', '%0.3f' % perr[0]
 		print 'b =\t','%0.3f' %  popt[1], '+/-\t', '%0.3f' % perr[1]

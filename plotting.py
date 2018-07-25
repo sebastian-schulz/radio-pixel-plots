@@ -18,9 +18,9 @@ def map_sqrt(pixels , cfg, galaxyname ):
 	tmp = np.zeros(shape = ( len(pixels), len(pixels)) )
 	for i in range(len(pixels)):
 		for j in range(len(pixels)):
-			tmp[i,j] = m.sqrt(m.fabs(pixels[i,j]))
+			tmp[i,j] = m.sqrt(m.fabs(pixels[i,j])) 
 	#Plot the modified data as a greyscale map (compare with original)
-	plt.imshow( tmp, cmap='gray')
+	plt.imshow( tmp, cmap='gray') #clim=(0 , 0.05)
 	plt.colorbar()
 	plt.ylim(0, cfg.getint('values','n_boxes') - 1 )
 	image_name = cfg.get('names', galaxyname )

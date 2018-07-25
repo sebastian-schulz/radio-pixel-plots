@@ -28,7 +28,6 @@ def read_fits( fname , PRINTALL):
 def print_data( cfg, data_low, data_high, data_hyb, alpha):
 	mean = 0.
 	tmp = cfg.get('names','galaxy').split(' ')
-	print tmp
 	dataname = tmp[0]+'_'+tmp[1]+'_pixels.dat'
 	f_tmp = open(dataname, 'w')
 	f_tmp.write('#low freq. radio \t high freq. radio \t hybrid SFR \t spectral index \n' )

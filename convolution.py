@@ -16,7 +16,7 @@ def flatten( data ):
 	return data
 
 ###Function that calculates the fit parameter a (slope) as a function of gaussian kernel width sigma
-def fct_gauss(sigma, data_s, pixels_l, pixels_h, config, opt, PRINTALL):
+def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL):
 	#Convolve with gaussian 
 	conv_s2d = convolve_gauss( data_s, config['values'], sigma, opt, PRINTALL )
 	conv_pix2d = convert1200_adv( conv_s2d, config['values'] )
@@ -26,9 +26,9 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, config, opt, PRINTALL):
 	conv_pix_h_cut = []
 	#applying the same 3 sigma cut as for the non-covolved data
 	for i in range(len(pixels_l)):
-		if(pixels_l[i] > 3* config.getfloat('values','sigma_low')):
-			if(pixels_h[i] > 3.* config.getfloat('values','sigma_high')): 
-				if(conv_pix[i] > 3.*config.getfloat('values','sigma_hybrid')): 
+		if(pixels_l[i] > 3. * cutoff['low'] ):
+			if(pixels_h[i] > 3. * cutoff['high'] ): 
+				if(conv_pix[i] > 3. * cutoff['sfr'] ): 
 					conv_pix_cut.append( conv_pix[i] )
 					conv_pix_l_cut.append( pixels_l[i] )
 					conv_pix_h_cut.append( pixels_h[i] )
@@ -47,8 +47,8 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, config, opt, PRINTALL):
 		return conv_pix_cut, conv_pix_l_cut, conv_alpha, a_l, b_l
 
 ###Gaussian Kernel function for optimization purposes, because optimize searches for zeros by default
-def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, config, opt, PRINTALL ):
-	_,_,_,x,_ = fct_gauss(sigma, data_s, pixels_l, pixels_h, config, opt, PRINTALL)
+def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL ):
+	_,_,_,x,_ = fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL)
 	return x-1.
 
 ###Convolution of the 2d image with gaussian kernel
