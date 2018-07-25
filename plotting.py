@@ -75,7 +75,7 @@ def plot(val_x, val_y, alpha, a, b, cfg, boundaries, case, sigma=None ):
 		elif( float(boundaries['med']) > alpha[i] > float(boundaries['high']) ):
 			val_med_x.append( val_x[i] )
 			val_med_y.append( val_y[i] )
-		elif( float(boundaries['low']) > alpha[i] ):
+		elif( float(boundaries['high']) > alpha[i] ):
 			val_steep_x.append( val_x[i] )
 			val_steep_y.append( val_y[i] )
 		else:
@@ -95,14 +95,14 @@ def plot(val_x, val_y, alpha, a, b, cfg, boundaries, case, sigma=None ):
 	#if(case == 'high' or case == 'low'):
 	#	plt.loglog(t, fct_volker(t, case) , linestyle='-.')
 	#Create a legend, labels ... be careful with latex symbols ...
-	plt.legend([boundaries['low']+r'$\,> {\alpha}\,$', boundaries['low']+r'$\,> {\alpha}>\,$' +boundaries['med'] ,boundaries['med'] + r'$\,> {\alpha} >\,$' +boundaries['med'] , r'{Condon}', r'{Python fit}']) #r'{Gnuplot fit}', r'{Outlier}'
+	plt.legend([boundaries['low']+r'$\,> {\alpha}\,$', boundaries['low']+r'$\,> {\alpha}>\,$' +boundaries['med'] ,  r'${\alpha} >\,$' + boundaries['high'] , r'{Condon}', r'{Least Square Fit}']) #r'{Gnuplot fit}', r'{Outlier}'
 	plt.grid(True)
 	plt.ylabel(r'{SFR surface density based on Radio data}')
 	plt.xlabel(r'{SFR surface density based on GALEX/Spitzer}')
 	plt.xlim(1e-4,1e-1)
 	plt.ylim(1e-4,1e-1)
 	#Save plots as pdf
-	if(case == 'radio_high' or case == 'radio_low'):
+	if(case == 'high' or case == 'low'):
 		outfile = cfg.get(case).rstrip('.fits') + '_pixel.pdf'
 	else:
 		outfile = cfg.get(case) + '_pixel.pdf'
