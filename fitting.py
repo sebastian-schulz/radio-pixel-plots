@@ -21,6 +21,7 @@ def fit(val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False, case='ls
 ### fits a *x +b =y
 ### needs x and y values as list or array
 def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=False):
+	#First sort the data into different arrays based on their spectral index
 	val_log_x = []
 	val_log_y = []
 	for i in range(len(val_x)):
@@ -32,9 +33,10 @@ def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=False):
 			val_log_y.append(0.)
 		else:
 			val_log_y.append( m.log10( val_y[i] ) )
-	
+	#Define the odr fitting function and then start the fit
 	myodr = odr.odr(fct_odr, [1.,0.], val_log_y, val_log_x, full_output=1)
 	outodr = odr.Output(myodr)
+	#Print results to screen and then return all the relevant data (values, std errors and chi squared)
 	if(outp == True):
 		print '########## FIT RESULTS ###########'
 		print 'a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0]
@@ -56,10 +58,10 @@ def fit_lsq (val_x, val_y, val_y2d_err=None, outp=False):
 			val_log_y.append(0.)
 		else:
 			val_log_y.append( m.log10( val_y[i] ) )
-	
+	#Fit with the LM-algorithm from scipy.optimize
 	popt, pcov = optimize.curve_fit( fct_lsq ,val_log_x, val_log_y,absolute_sigma=True, method='lm')
 	perr = np.sqrt(np.diag(pcov))
-	
+	#The chisquared needs to be calculated, as the curve_fit does not have an option to do so...
 	chisq = 0
 	for i in range(len(val_log_x)):
 		chisq += m.pow( fct_lsq(val_log_x[i], popt[0], popt[1]) - val_log_y[i] ,2)

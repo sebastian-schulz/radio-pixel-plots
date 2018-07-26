@@ -1,0 +1,10 @@
+This is a collection of python scripts in order to analyze radio maps (i.e. from LOFAR) and calculate star formation rate maps from this maps (using the condon relation)
+In a second step it also 'simulates' the fact radio maps should be smeared out compared to sfr maps (due to cosmic ray diffusion). Therefor it covolves the radio maps with a gaussian kernel and fits the kernels sigma so that the two star formation rates match.
+
+The main program is called 'pixelplots.py'. It needs the radio maps to be in the same directory. You also need to update the config file to your paths and fill in data of the galaxy you want to analyze. A default file for NGC 5194 is provided in the radio-pixel-plots folder (called n5194.ini).
+
+usage then is $: python pixelplots.py <path to config file>
+
+compare.py is a standalone script that will write all the resulting data (if you ran pixelplots.py for many different galaxies) into one tab separated file for further analysis. More functionality will be added ...
+
+A more in depth documentation will be provided in the future. Also check the code for documentation on how exactly it works.

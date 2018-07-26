@@ -31,6 +31,7 @@ FIT_METHOD = 'lsq'
 ### FUNCTIONS ###
 #################
 
+#For more information on what those functions do, check their respective files for documentation
 from plotting import condon, fct_f, fct_result, map_sqrt, plot
 from conversion import ceil, floor, convert1200, convert1200_adv, conv_px_per_box, calculate_rms
 from convolution import convolve_gauss, fct_gauss, fct_gauss_fit, convert_kpc2px, convert_px2kpc, flatten
@@ -39,8 +40,6 @@ from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
 
 ###########################
 ### PROGRAM STARTS HERE ###
-#TODO: 
-# 	???
 ###########################
 ###Read in config file from command line argument, exit if it cant be found
 if(len(sys.argv) < 2):
@@ -69,6 +68,7 @@ os.chdir(config['names']['fullpath'])
 print  'Current working directory is:', os.getcwd()
 
 ###Create png versions of the full fits files, including the (cutting) box using ds9
+###also includes the 'rmsbox' to calculate the sigmas for the 3 sigma cutoff
 boxsize = 	str(config.getint('values','n_boxes') * conv_px_per_box( config['values'] ) )
 cmd = {}
 center_x = config.get('values','center_x')
@@ -93,6 +93,7 @@ for fname in (['low','high','sfr']):
 			oname +' -quit')
 	if( PRINTALL==True ):
 		os.system(cmd[fname])
+#Save the DS9 command as string to print to results file later
 for key in cmd:
 	cmd[key] = cmd[key].rstrip('-quit')
 
@@ -112,11 +113,10 @@ pixels_h = flatten ( pixels2d_h )
 pixels_s = flatten ( pixels2d_s )
 
 ###Apply the cuts to the data based on the signal
-###create three empty lists to store the 3sigma cut data
+###create three empty lists to store the 3 sigma cut data
 pix_l_cut = []
 pix_h_cut = []
 pix_s_cut = []
-
 
 sigma_high = calculate_rms( data_h, config['high_cutoff_box'])
 sigma_low = calculate_rms( data_l, config['low_cutoff_box'])
@@ -187,7 +187,8 @@ a_h , a_h_err , b_h, b_h_err, chi_h = fit(	pix_s_cut,
 
 ###Finding optimal gaussian kernel for both radio maps
 ### Calculating pixel values and fits based on the optimal kernel
-#low frequency radio map
+
+###low frequency radio map
 print 'Finding optimal gaussian kernel for LOFAR (low) data. This may take a moment...'
 optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL), maxfev = 10 )
 
@@ -199,7 +200,7 @@ fit(conv_pix_cut_low, conv_pix_l_cut, output=True)
 optimal_sigma_l[0] = m.sqrt( m.pow(2.3548 *optimal_sigma_l[0],2) + m.pow(1.2,2) )/2.
 print 'Final value for Diffusion length:\t','%0.3f' % optimal_sigma_l[0], 'kpc'
 
-#high frequency radio map
+###high frequency radio map
 print 'Finding optimal gaussian kernel for WSRT (high) data. This may take a moment...'
 optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'high', PRINTALL ), maxfev = 10 )
 

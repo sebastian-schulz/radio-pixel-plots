@@ -16,13 +16,15 @@ if(len(sys.argv) != 2 ):
 
 parent = str(sys.argv[1])
 #Command to search for all files ending in 'results.ini' below working directory './'
+#Result is stored as a list of strings 
 #works recursively!
 datafiles = [os.path.join(root, name)
 			for root, dirs, files in os.walk(parent)
 			for name in files
 			if name.endswith("results.ini")]
 
-#Result is stored as a list of strings
+#Now print all results to file as tab separated values,
+#starting with column descriptions
 for i in range(len(datafiles)):
 	print datafiles[i]
 outfile = open(parent+'/comparison.dat', 'w')
@@ -42,7 +44,7 @@ outfile.write(	'Galaxy name\t'+
 		'l low\t'+
 		'l high\n')
 
-#now use configparsers to read in all the files and print all their key : value pairs
+#Now write the actual data 
 for item in datafiles:
 	config = configparser.ConfigParser()
 	config.read(item)
@@ -61,42 +63,6 @@ for item in datafiles:
 			'%.2f' % float(config['High_freq_fit']['chi_sqr'])+'\t'+
 			'%.2f' % float(config['Conv_results']['sigma_l'])+'\t'+
 			'%.2f' % float(config['Conv_results']['sigma_h'])+'\n')
-
-	#print config.sections()
-	#for item in sect:
-		#Two different ways to format number output
-		#for key in config[item]: print key, ' = ','%.2f' % float(config[item][key])
-		#for key in config[item]: print key, ' = ',round(float(config[item][key]),2)
-### Now we have all the output data als configparsers lists of strings.
-#to format use 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

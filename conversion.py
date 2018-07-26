@@ -12,6 +12,9 @@ def conv_px_per_box( cfg ):
 #Calculate RMS inside the box defined using DS9
 def calculate_rms( data, cfg ):
 	rms = 0.
+	#calculate borders of the rms box in pixel, makes use of int cutting
+	#therefor the box may be 1 pixel length off in any direction
+	#but that only has a small impact
 	y_min = cfg.getint('center_x') - cfg.getint('size_x') / 2
 	y_max = cfg.getint('center_x') + cfg.getint('size_x') / 2
 	x_min = cfg.getint('center_y') - cfg.getint('size_y') / 2
@@ -109,6 +112,7 @@ loop over all p'
 	#print 'Total number of original pixels used in conv:\t', N
 	return pixels / (px_per_box)**2
 
+#Custom defined ceiling and floor functions with int as return type
 def ceil(x):
 	return int(m.ceil(x))
 
