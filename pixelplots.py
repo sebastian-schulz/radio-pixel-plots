@@ -42,16 +42,17 @@ from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
 ### PROGRAM STARTS HERE ###
 ###########################
 ###Read in config file from command line argument, exit if it cant be found
-if(len(sys.argv) < 2):
+if(len(sys.argv) == 1):
 	print 'Need filname of config file'
 	sys.exit(-1)
-tmp_name = str(sys.argv[1])
-if(len(sys.argv)==3):
+elif(len(sys.argv)==2):
+	tmp_name = str(sys.argv[1])
+elif(len(sys.argv)==3):
 	if (sys.argv[2] == '1'):
 		PRINTALL = True
 else:
 	print 'Too many command line arguments! Quitting...'
-	quit()
+	sys.exit(-1)
 print 'Full output is set to: ', PRINTALL, ' (change through command line)'
 print 'Currently using ', FIT_METHOD, ' as fitting method (change directly in the code).'
 
@@ -127,7 +128,7 @@ sigma = {'low' : sigma_low, 'high' : sigma_high, 'sfr' : sigma_sfr }
 for i in range(len(pixels_l)):
 	if(pixels_l[i] > 3. * sigma_low ):
 		if(pixels_h[i] > 3. * sigma_high): 
-			if(pixels_s[i] > 5. * sigma_sfr ): 
+			if(pixels_s[i] > 3. * sigma_sfr ): 
 				pix_l_cut.append(pixels_l[i])
 				pix_h_cut.append(pixels_h[i])
 				pix_s_cut.append(pixels_s[i])
@@ -147,7 +148,7 @@ mean = print_data( config, pix_l_cut, pix_h_cut, pix_s_cut, alpha )
 mean_old = 0
 tmp = flatten( data_l )
 for i in range(len(tmp)):
-	mean_old += tmp[i]
+	mean_old += m.fabs(tmp[i])
 mean = 0
 for i in range(len(pixels_l)):
 	mean += pixels_l[i]
@@ -262,6 +263,11 @@ res_out['High_freq_fit'] =	{'a': str(a_h),
 res_out['Conv_results'] =	{'#Diffusion length from gaussian kernel in kpc \n'
 							'sigma_l': str(optimal_sigma_l[0]),
 							'sigma_h': str(optimal_sigma_h[0])}
+							
+res_out['rms_sigma'] = 		{'#The RMS values from calculated from the rms boxes\n'
+							'rms_l': str(sigma_low),
+							'rms_h': str(sigma_high),
+							'rms_s': str(sigma_sfr)}
 
 with open(results_ini, 'w') as configfile:
 	res_out.write(configfile)

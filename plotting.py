@@ -79,8 +79,8 @@ def plot(val_x, val_y, alpha, a, b, cfg, boundaries, case, sigma=None ):
 			val_steep_x.append( val_x[i] )
 			val_steep_y.append( val_y[i] )
 		else:
-			val_outlier_x.append[i]
-			val_outlier_y.append[i]
+			val_outlier_x.append( val_x[i] )
+			val_outlier_y.append( val_y[i] )
 	
 	#Create the plot: 
 	t = np.linspace(1e-4,1e-1) #datapoints in the plotting range
