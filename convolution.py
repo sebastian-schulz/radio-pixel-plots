@@ -17,6 +17,10 @@ def flatten( data ):
 
 ###Function that calculates the fit parameter a (slope) as a function of gaussian kernel width sigma
 def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL):
+	#Compute new spectral indices (may have changed due to different cutting)
+	conv_alpha = []
+	for i in range(len(pixels_l)):
+		conv_alpha.append( m.log10( m.fabs(pixels_l[i] /pixels_h[i]) ) / m.log10( config.getfloat('values','freq_low') / config.getfloat('values','freq_high') ))
 	#Convolve with gaussian 
 	conv_s2d = convolve_gauss( data_s, config['values'], sigma, opt, PRINTALL )
 	conv_pix2d = convert1200_adv( conv_s2d, config['values'] )
@@ -24,27 +28,26 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL):
 	conv_pix_cut = []
 	conv_pix_l_cut = []
 	conv_pix_h_cut = []
+	conv_alpha_cut = []
 	#applying the same 3 sigma cut as for the non-covolved data
 	for i in range(len(pixels_l)):
 		if(pixels_l[i] > 3. * cutoff['low'] ):
 			if(pixels_h[i] > 3. * cutoff['high'] ): 
-				if(conv_pix[i] > 3. * cutoff['sfr'] ): 
-					conv_pix_cut.append( conv_pix[i] )
-					conv_pix_l_cut.append( pixels_l[i] )
-					conv_pix_h_cut.append( pixels_h[i] )
-	#Compute new spectral indices (may have changed due to different cutting)
-	conv_alpha = []
-	for i in range(len(conv_pix_cut)):
-		conv_alpha.append( m.log10( conv_pix_l_cut[i] /conv_pix_h_cut[i] ) / m.log10( config.getfloat('values','freq_low') / config.getfloat('values','freq_high') ))
+				if(conv_pix[i] > 3. * cutoff['sfr'] ):
+					if( conv_alpha[i] <= config.getfloat( 'boundaries','low' ) ):
+						conv_alpha_cut.append( conv_alpha[i] )
+						conv_pix_cut.append( conv_pix[i] )
+						conv_pix_l_cut.append( pixels_l[i] )
+						conv_pix_h_cut.append( pixels_h[i] )
 		#Now apply the condon relation to the radio map set via parameter 'opt' and return values
 	if(opt == 'high'):
 		conv_pix_h_cut = condon( conv_pix_h_cut, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
 		a_h , _ , b_h, _, _ = fit(conv_pix_cut, conv_pix_h_cut)
-		return conv_pix_cut, conv_pix_h_cut, conv_alpha, a_h, b_h
+		return conv_pix_cut, conv_pix_h_cut, conv_alpha_cut, a_h, b_h
 	elif(opt == 'low'):
 		conv_pix_l_cut = condon( conv_pix_l_cut, config.getfloat('values','FWHM'), config.getfloat('values','freq_low') )
 		a_l , _ , b_l, _, _ = fit(conv_pix_cut, conv_pix_l_cut)
-		return conv_pix_cut, conv_pix_l_cut, conv_alpha, a_l, b_l
+		return conv_pix_cut, conv_pix_l_cut, conv_alpha_cut, a_l, b_l
 
 ###Gaussian Kernel function for optimization purposes, because optimize searches for zeros by default
 def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL ):

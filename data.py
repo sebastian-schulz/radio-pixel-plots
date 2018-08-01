@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 #Library to understand the fits format
 from astropy.io import fits
+#Mighty numerical library of ptyhon
+import numpy as np
 
 ###Read image from fits file and store it in 2d numpy array
 def read_fits( fname , PRINTALL):
@@ -16,7 +18,22 @@ def read_fits( fname , PRINTALL):
 		#Check for size and shape of the array
 		#print 'Data type and shape of', fname ,':',type(data), data.shape 
 		#Now plot all the map (compare to fits file if something doesnt work)
-		plt.imshow(data, cmap='gray')
+		
+		#first create a histogram with 1e6 bins to set the z-scale to 90%
+		values, edges = np.histogram(data, bins = 1000000, range=(0, data.max()))
+		total = 0
+		for l in range(len(values)):
+			total += values[l]
+		i = 0
+		cmax = 0
+		while True:
+			cmax +=values[i]
+			if( cmax > total * .99 ):
+				break
+			i += 1
+		#print str(i)+'\n'+str(edges[i])
+		#Create the plot with boundaries between 0 and 99% of the histogram
+		plt.imshow(data, cmap='gray', clim=( 0 , edges[i] ) )
 		plt.colorbar()
 		plt.ylim(0,1024)
 		fname_image = fname.rstrip('.fits') + '.png'
