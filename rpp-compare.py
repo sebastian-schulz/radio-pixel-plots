@@ -42,7 +42,9 @@ outfile.write(	'Galaxy name\t'+
 		'b_err\t'+
 		'chi_sqr\t'+
 		'l low\t'+
-		'l high\n')
+		'a err\t'+
+		'l low\t'+
+		'a err\n')
 
 #Now write the actual data 
 for item in datafiles:
@@ -63,10 +65,9 @@ for item in datafiles:
 			'%.2f' % float(config['High_freq_fit']['b_err'])+'\t'+
 			'%.2f' % float(config['High_freq_fit']['chi_sqr'])+'\t'+
 			'%.2f' % float(config['Conv_results']['sigma_l'])+'\t'+
-			'%.2f' % float(config['Conv_results']['sigma_h'])+'\n')
-
-
-
+			'%.2f' % float(config['Conv_results']['a_err_l'])+'\t'+
+			'%.2f' % float(config['Conv_results']['sigma_h'])+'\t'+
+			'%.2f' % float(config['Conv_results']['a_err_h'])+'\n')
 
 
 

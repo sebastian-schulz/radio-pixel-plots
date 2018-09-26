@@ -6,7 +6,7 @@ import math as m
 
 #number of pixels along one direction of a box to achieve 1200pc length (float)
 def conv_px_per_box( cfg ):
-	tmp = 1200. / ( cfg.getfloat('distance') * m.tan( m.radians(1./3600.) ) / cfg.getfloat('pixel_per_arcsec') )
+	tmp = 1000. * cfg.getfloat('kpc') / ( cfg.getfloat('distance') * m.tan( m.radians(1./3600.) ) / cfg.getfloat('pixel_per_arcsec') )
 	return float( tmp )
 
 #Calculate RMS inside the box defined using DS9
@@ -45,7 +45,7 @@ def convert1200( data, cfg ):
 	return pixels / ( px_per_box )**2
 
 #PASSED BUGTEST (July 2018), gives the same results as DS9 with the same boxes
-def convert1200_adv( data, cfg ):
+def convert_resolution_adv( data, cfg ):
 	''' Idea: allow for pixels_per_box to be float!
 assumption 1 : middle pixel for p and p' have the same position (center)
 calculate everything in p distances: (n_boxes should be odd!)

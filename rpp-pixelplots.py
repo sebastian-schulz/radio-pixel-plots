@@ -7,7 +7,7 @@ from subprocess import call
 
 #Pythons math package with all the constants and functions
 import math as m
-
+import numpy as np
 #Library includes a zero-finder method (to find the best value for the kernel), also includes methods fit data/curves
 from scipy import optimize
 
@@ -25,7 +25,7 @@ PRINTALL = True
 
 #Global variable to set the fitting mechanism, default is lsq, which accepts y-errors and uses Levenberg-Marquart
 #alternatively use option odr to also include x-errors
-FIT_METHOD = 'lsq' #'odr'
+FIT_METHOD = 'odr' #'lsq'
 
 #################
 ### FUNCTIONS ###
@@ -33,7 +33,7 @@ FIT_METHOD = 'lsq' #'odr'
 
 #For more information on what those functions do, check their respective files for documentation
 from plotting import condon, fct_f, fct_result, map_sqrt, plot
-from conversion import ceil, floor, convert1200, convert1200_adv, conv_px_per_box, calculate_rms
+from conversion import ceil, floor, convert_resolution_adv, conv_px_per_box, calculate_rms
 from convolution import convolve_gauss, fct_gauss, fct_gauss_fit, convert_kpc2px, convert_px2kpc, flatten
 from data import print_conv_data, print_data, read_fits
 from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
@@ -111,9 +111,9 @@ data_h = read_fits(config.get('names','high'), PRINTALL)
 data_s = read_fits(config.get('names','sfr'), PRINTALL)
 
 ###Call the convert function 3 times to convert each map to 1200pc^2 pixels
-pixels2d_l = convert1200_adv( data_l, config['values'] )
-pixels2d_h = convert1200_adv( data_h, config['values'] )
-pixels2d_s = convert1200_adv( data_s, config['values'] )
+pixels2d_l = convert_resolution_adv( data_l, config['values'] )
+pixels2d_h = convert_resolution_adv( data_h, config['values'] )
+pixels2d_s = convert_resolution_adv( data_s, config['values'] )
 
 ###Flatten the data to 1D lists
 pixels_l = flatten ( pixels2d_l )
@@ -128,37 +128,51 @@ for i in range(len(pixels_l)):
 ###Apply the cuts to the data based on the signal
 ###create three empty lists to store the 3 sigma cut data
 pix_l_cut = []
+pix_l_cut_err = []
 pix_h_cut = []
+pix_h_cut_err = []
 pix_s_cut = []
+pix_s_cut_err = []
 alpha_cut = []
 
 pix_l_fit = []
+pix_l_fit_err = []
 pix_h_fit = []
+pix_h_fit_err = []
 pix_s_fit = []
+pix_s_fit_err = []
 alpha_fit = []
 #calculate rms from the boxes set in the config file
 sigma_high = calculate_rms( data_h, config['high_cutoff_box'])
 sigma_low = calculate_rms( data_l, config['low_cutoff_box'])
 sigma_sfr = calculate_rms( data_s, config['sfr_cutoff_box'])
 #Use these lines if you want to change the cutoff directly *quick and dirty*
-#sigma_high = 3e-6
-#sigma_low = 3e-6
-#sigma_sfr = 1./3. *4e-4
+#sigma_high /= 10.
+#sigma_low /= 10.
+#sigma_sfr /= 10.
 sigma = {'low' : sigma_low, 'high' : sigma_high, 'sfr' : sigma_sfr }
 #3 sigma cutoff for all datasets
+# for each dataset, there is a corresponding set containing the errors
+# name is always the same with _err attached
 for i in range(len(pixels_l)):
 	if(pixels_l[i] > 3. * sigma_low ):
 		if(pixels_h[i] > 3. * sigma_high): 
 			if(pixels_s[i] > 3. * sigma_sfr ):
 					alpha_cut.append(alpha_tmp[i])
 					pix_l_cut.append(pixels_l[i])
+					pix_l_cut_err.append( sigma_low )
 					pix_h_cut.append(pixels_h[i])
+					pix_h_cut_err.append( sigma_high )
 					pix_s_cut.append(pixels_s[i])
+					pix_s_cut_err.append( sigma_sfr )
 					if(alpha_tmp[i] < config.getfloat('boundaries','low') ):
 						alpha_fit.append(alpha_tmp[i])
 						pix_l_fit.append(pixels_l[i])
+						pix_l_fit_err.append( sigma_low )
 						pix_h_fit.append(pixels_h[i])
+						pix_l_cut_err.append( sigma_high )
 						pix_s_fit.append(pixels_s[i])
+						pix_s_fit_err.append( sigma_sfr )
 
 print 'RMS for the 3 different maps, used as sigma for 3 sigma cutoff:\n', sigma
 
@@ -178,8 +192,8 @@ for i in range(len(pixels_l)):
 
 
 mean *=  conv_px_per_box( config['values'] )**2
-print 'Total total sum of LOFAR image:\t', '%0.3f' % mean_old
-print 'Total sum in the cut LOFAR map is:', '%0.3f' % mean
+print 'Total total sum of lower freq. image:\t', '%0.3f' % mean_old
+print 'Total sum in the cut lower freq. map is:', '%0.3f' % mean
 
 ###Now convert lofar and swrt to SFR sufrace density using condon-relation
 pix_l_cut = condon( pix_l_cut, config.getfloat('values','FWHM'), config.getfloat('values','freq_low') )
@@ -187,22 +201,32 @@ pix_h_cut = condon( pix_h_cut, config.getfloat('values','FWHM'), config.getfloat
 pix_l_fit = condon( pix_l_fit, config.getfloat('values','FWHM'), config.getfloat('values','freq_low') )
 pix_h_fit = condon( pix_h_fit, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
 
+#The same conversion is performed on the errors
+pix_l_cut_err = condon( pix_l_cut_err, config.getfloat('values','FWHM'), config.getfloat('values','freq_low') )
+pix_h_cut_err = condon( pix_h_cut_err, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
+pix_l_fit_err = condon( pix_l_fit_err, config.getfloat('values','FWHM'), config.getfloat('values','freq_low') )
+pix_h_fit_err = condon( pix_h_fit_err, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
+
+
 ### Diganosis only: Create square rooted map of the 1200pc data (to check if the cutting worked as intended)
 if( PRINTALL == True ):
 	map_sqrt(pixels2d_l, config, 'low')
 	map_sqrt(pixels2d_h, config, 'high')
 	map_sqrt(pixels2d_s, config, 'sfr')
 
-
 ###Fitting for both datasets
 #Fitting low /LOFAR
 a_l , a_l_err , b_l, b_l_err, chi_l = fit(	pix_s_fit, 
 											pix_l_fit,
+											val_x_err=pix_s_fit_err,
+											val_y_err=pix_l_fit_err,
 											output=True,
 											case=FIT_METHOD)
 #Fitting high / WSRT
 a_h , a_h_err , b_h, b_h_err, chi_h = fit(	pix_s_fit,
 											pix_h_fit,
+											val_x_err=pix_s_fit_err,
+											val_y_err=pix_h_fit_err,
 											output=True,
 											case=FIT_METHOD)
 
@@ -215,27 +239,24 @@ a_h , a_h_err , b_h, b_h_err, chi_h = fit(	pix_s_fit,
 ### Calculating pixel values and fits based on the optimal kernel
 
 ###low frequency radio map
-print 'Finding optimal gaussian kernel for LOFAR (low) data. This may take a moment...'
-optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL), maxfev = 20 )
+print 'Finding optimal gaussian kernel for lower freqency data. This may take a moment...'
+optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, FIT_METHOD), maxfev = 20 )
 
-conv_pix_cut_low, conv_pix_l_cut, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL )
+conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, FIT_METHOD )
 
-fit(conv_pix_cut_low, conv_pix_l_cut, output=True)
-
-###IMPORT CONVOLVE HERE TO MANUALLY COMPUTE DATA FOR A GIVEN SIGMA (no sigma fitting)
-#THEN FIT AND PLOT AS USUAL
+_, a_l_conv_err, _, _, _ = fit(conv_pix_cut_low, conv_pix_l_cut, val_x_err=conv_pix_cut_low_err, val_y_err=conv_pix_l_cut_err, output=True, case=FIT_METHOD)
 
 #Diffusion length is the FWHM/2 of the final image, FWHM are square added first
 optimal_sigma_l[0] = m.sqrt( m.pow(2.3548 *optimal_sigma_l[0],2) + m.pow(1.2,2) )/2.
 print 'Final value for Diffusion length:\t','%0.3f' % optimal_sigma_l[0], 'kpc'
 
 ###high frequency radio map
-print 'Finding optimal gaussian kernel for WSRT (high) data. This may take a moment...'
-optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'high', PRINTALL ), maxfev = 20 )
+print 'Finding optimal gaussian kernel for higher frequency data. This may take a moment...'
+optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'high', PRINTALL, FIT_METHOD ), maxfev = 20 )
 
-conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0], data_s, pixels_l, pixels_h, sigma, config, 'high', PRINTALL )
+conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0], data_s, pixels_l, pixels_h, sigma, config, 'high', PRINTALL, FIT_METHOD )
 
-fit(conv_pix_cut_high, conv_pix_h_cut, output=True)
+_, a_h_conv_err, _, _, _ = fit(conv_pix_cut_high, conv_pix_h_cut, val_x_err=conv_pix_cut_high_err, val_y_err=conv_pix_h_cut_err, output=True, case=FIT_METHOD)
 
 #Diffusion length is the FWHM/2 of the final image, FWHM are square added first
 optimal_sigma_h[0] = m.sqrt( m.pow(2.3548 *optimal_sigma_h[0],2) + m.pow(1.2,2) )/2.
@@ -251,20 +272,20 @@ print 'Creating final images and writing results to file ...'
 	except:
 		pass
 '''
+#TODO INCLUDE THE REAL ERRORS!!! (arrays not just sigma)
 
-###CHANGE PLOTS TO INCLUDE OUTLIERS!!!, EXCLUDED FOR FITTING! THEN RE-RUN ALL
 #Plotting low / LOFAR
-plot(pix_s_cut, pix_l_cut, alpha_cut, a_l, b_l, config , 'low' )
+plot(pix_s_cut, pix_l_cut, alpha_cut, a_l, b_l, config , 'low', x_err=pix_s_cut_err ,y_err=pix_l_cut_err )
 #Plotting high / WSRT
-plot(pix_s_cut, pix_h_cut, alpha_cut, a_h, b_h, config, 'high' )
+plot(pix_s_cut, pix_h_cut, alpha_cut, a_h, b_h, config, 'high', x_err=pix_s_cut_err ,y_err=pix_h_cut_err )
 #Plotting convolved data (low freq.)
-plot(conv_pix_cut_low, conv_pix_l_cut, conv_alpha_l, a_smooth_l, b_smooth_l, config, 'conv_low' , optimal_sigma_l[0])
+plot(conv_pix_cut_low, conv_pix_l_cut, conv_alpha_l, a_smooth_l, b_smooth_l, config, 'conv_low' , optimal_sigma_l[0], x_err=conv_pix_cut_low_err ,y_err=conv_pix_l_cut_err)
 #Plotting convolved data (high freq.)
-plot(conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, a_smooth_h, b_smooth_h, config, 'conv_high' , optimal_sigma_h[0])
+plot(conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, a_smooth_h, b_smooth_h, config, 'conv_high' , optimal_sigma_h[0], x_err=conv_pix_cut_high_err ,y_err=conv_pix_h_cut_err)
 
 ###Print all convolved pixel data to file (after the 3 sigma cut and conversion to SFR)
-mean = print_conv_data( config,conv_pix_cut_low, conv_pix_l_cut , conv_alpha_l ,'_conv_low' )
-mean = print_conv_data( config, conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, '_conv_high' )
+mean = print_conv_data( config, conv_pix_cut_low, conv_pix_l_cut , conv_alpha_l ,'conv_low')
+mean = print_conv_data( config, conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, 'conv_high')
 
 ### Write the final results (fits and diffusion lengths) to file
 # this makes use of the configparser library again 
@@ -292,6 +313,8 @@ res_out['High_freq_fit'] =	{'a': str(a_h),
 
 res_out['Conv_results'] =	{'#Diffusion length from gaussian kernel in kpc \n'
 							'sigma_l': str(optimal_sigma_l[0]),
+							'a_err_l': str(a_l_conv_err),
+							'a_err_h': str(a_h_conv_err),
 							'sigma_h': str(optimal_sigma_h[0])}
 							
 res_out['rms_sigma'] = 		{'#The RMS values from calculated from the rms boxes\n'
@@ -307,9 +330,14 @@ res_out['frequencies'] = 		{'#Frequencies for the two radio maps\n'
 with open(results_ini, 'w') as configfile:
 	res_out.write(configfile)
 
-os.system('rm plots_combined.pdf')
-os.system('pdfunite *pdf plots_combined.pdf')
+tmp = config.get('names','galaxy').split(' ')
+tmp2 = tmp[0]+'_'+tmp[1]+'_plots_combined.pdf'
+
+os.system('rm *plots_combined.pdf')
+os.system('pdfunite *pdf '+ tmp2 )
 print "Finished!"
+
+
 
 
 

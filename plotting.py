@@ -57,30 +57,47 @@ def fct_result(x, a, b):
 	return x**a * 10**b
 
 ###Plotting function, also sorts data according to spectral index 
-def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None ):
+def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None, x_err=None, y_err=None ):
 	#Define empty arrys/lists to store portions of data based on different spectral indices
+	#add in support for plots with error-bars both in x and y, maybe both?
 	val_flat_x = []
+	val_flat_x_err = []
 	val_flat_y = []
+	val_flat_y_err = []
 	val_med_x = []
+	val_med_x_err = []
 	val_med_y = []
+	val_med_y_err = []
 	val_steep_x = []
+	val_steep_x_err = []
 	val_steep_y = []
+	val_steep_y_err = []
 	val_outlier_x = []
+	val_outlier_x_err = []
 	val_outlier_y = []
+	val_outlier_y_err = []
 	#Sort the data into different ranges of alpha
 	for i in range(len(val_x)):
 		if( cfg.getfloat('boundaries','low') > alpha[i] > cfg.getfloat('boundaries','med') ):
 			val_flat_x.append( val_x[i] )
+			val_flat_x_err.append( x_err[i] )
 			val_flat_y.append( val_y[i] )
+			val_flat_y_err.append( y_err[i] )
 		elif( cfg.getfloat('boundaries','med') > alpha[i] > cfg.getfloat('boundaries','high') ):
 			val_med_x.append( val_x[i] )
+			val_med_x_err.append( x_err[i] )
 			val_med_y.append( val_y[i] )
+			val_med_y_err.append( y_err[i] )
 		elif( cfg.getfloat('boundaries','high') > alpha[i] ):
 			val_steep_x.append( val_x[i] )
+			val_steep_x_err.append( x_err[i] )
 			val_steep_y.append( val_y[i] )
+			val_steep_y_err.append( y_err[i] )
 		else:
 			val_outlier_x.append( val_x[i] )
+			val_outlier_x_err.append( x_err[i] )
 			val_outlier_y.append( val_y[i] )
+			val_outlier_y_err.append( y_err[i] )
 	
 	#Create the plot: 
 	t = np.linspace(1e-5,1e-1) #datapoints in the plotting range
@@ -94,21 +111,25 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None ):
 	l4 = '{Condon}'
 	l5 = r'{Least Square Fit}'
 
+	ax = plt.subplot(111)
 	#double-logarithmic plots with advanced options (color, marker, ...)
-	plt.loglog( val_steep_x , val_steep_y, marker='^', linestyle='None', color='b', label=l1)
-	plt.loglog( val_med_x , val_med_y , marker='o', linestyle='None', color='g', label=l2)
-	plt.loglog( val_flat_x, val_flat_y , marker='v', linestyle='None', color='r', label=l3)
-	plt.loglog( t, fct_f(t) ,linestyle='--', label=l4)
-	plt.loglog(t, fct_result(t, a, b) , linestyle='-', label=l5)
-	plt.loglog( val_outlier_x, val_outlier_y , marker='s', linestyle='None', color='tab:gray', label=l6)
+	ax.errorbar( val_steep_x , val_steep_y, xerr=val_steep_x_err, yerr=val_steep_y_err, marker='.', linestyle='None', color='b', label=l1)
+	ax.errorbar( val_med_x , val_med_y, xerr=val_med_x_err, yerr=val_med_x_err, marker='.', linestyle='None', color='g', label=l2)
+	ax.errorbar( val_flat_x, val_flat_y, xerr=val_flat_x_err, yerr= val_flat_y_err, marker='.', linestyle='None', color='r', label=l3)
+	ax.plot( t, fct_f(t) ,linestyle='--', label=l4)
+	ax.plot(t, fct_result(t, a, b) , linestyle='-', label=l5)
+	ax.errorbar( val_outlier_x, val_outlier_y, xerr=val_outlier_x_err, yerr=val_outlier_y_err, marker='.', linestyle='None', color='tab:gray', label=l6)
 	#if(case == 'high' or case == 'low'):
 	#	plt.loglog(t, fct_volker(t, case) , linestyle='-.')
 	#Create a legend, labels ... be careful with latex symbols ...
-	plt.legend()
+	ax.legend()
 
-	plt.grid(True)
-	plt.ylabel(r'{SFR surface density based on Radio data}')
-	plt.xlabel(r'{SFR surface density based on GALEX/Spitzer}')
+	ax.set_xscale("log", nonposx='clip')
+	ax.set_yscale("log", nonposy='clip')
+
+	ax.grid(True)
+	ax.set_ylabel(r'{SFR surface density based on Radio data}')
+	ax.set_xlabel(r'{SFR surface density based on GALEX/Spitzer}')
 	#plt.xlim(1e-4,1e-1)
 	#plt.ylim(1e-4,1e-1)
 	#Save plots as pdf
@@ -116,6 +137,8 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None ):
 		outfile = cfg.get('names',case).rstrip('.fits') + '_pixel.pdf'
 	else:
 		outfile = cfg.get('names',case) + '_pixel.pdf'
+		tmp = cfg.get('names','galaxy').split(' ')
+		outfile = tmp[0]+'_'+tmp[1]+'_'+ cfg.get('names',case) +'_pixel_conv.pdf'
 	
 	if(case == 'conv_low'):
 		title = cfg.get('names','galaxy') + r' with Gaussian kernel, $l = $'+'%0.2f' % sigma + r' kpc , @' + cfg.get('values','freq_low') + r' MHz'
@@ -126,7 +149,7 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None ):
 	elif(case == 'high'):
 		title = cfg.get('names','galaxy') + r', @' + cfg.get('values','freq_high') + r' MHz'
 	
-	plt.title( title )
+	ax.set_title( title )
 	plt.savefig( outfile )
 	plt.clf() #clean for further plotting
 	return None

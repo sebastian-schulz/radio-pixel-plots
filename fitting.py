@@ -8,11 +8,13 @@ import numpy as np
 from scipy import odr
 
 ### Main fitting function, calls one of the 2 possible ones based on case
-def fit(val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False, case='lsq'):
+def fit(val_x, val_y, val_x_err=None, val_y_err=None, output=False, case='None'):
 	if(case=='lsq'):
-		return fit_lsq (val_x, val_y, val_y2d_err=None, outp=output)
+		print 'LSQ fitting is depreceated in this version, please use odr fitting with errors instead!'
+		quit()
+		return fit_lsq (val_x, val_y, val_y_err=val_y_err, outp=output)
 	elif(case=='odr'):
-		 return fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=output)
+		return fit_odr (val_x, val_y, val_x_err=val_x_err, val_y_err=val_y_err, outp=output)
 	else:
 		print 'Error in fitting function call!'
 		quit()
@@ -20,10 +22,12 @@ def fit(val_x, val_y, val_x2d_err=None, val_y2d_err=None, output=False, case='ls
 ###Fitting function with x and y errors see Python Scipy ODR
 ### fits a *x +b =y
 ### needs x and y values as list or array
-def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=False):
+def fit_odr (val_x, val_y, val_x_err=None, val_y_err=None, outp=False):
 	#First sort the data into different arrays based on their spectral index
 	val_log_x = []
 	val_log_y = []
+	val_log_x_err = []
+	val_log_y_err = []
 	for i in range(len(val_x)):
 		if (val_x[i] < 0 ):
 			val_log_x.append(0.)
@@ -33,9 +37,22 @@ def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=False):
 			val_log_y.append(0.)
 		else:
 			val_log_y.append( m.log10( val_y[i] ) )
+
 	#Define the odr fitting function and then start the fit
-	myodr = odr.odr(fct_odr, [1.,0.], val_log_y, val_log_x, full_output=1)
-	outodr = odr.Output(myodr)
+	linear = odr.Model(fct_odr)
+	
+	if( val_x_err and val_y_err ):
+		for i in range(len(val_x_err)):
+			val_log_x_err.append( m.log10( val_x_err[i] ) )
+			val_log_y_err.append( m.log10( val_y_err[i] ) )
+		mydata = odr.RealData( val_log_x, val_log_y, sx=val_log_x_err ,sy=val_log_y_err)
+	else:
+		print 'No errors defined!'
+		mydata = odr.Data( val_log_x, val_log_y )
+	
+	myodr = odr.ODR(mydata, linear, beta0=[1., 0.])
+	outodr = myodr.run()
+
 	#Print results to screen and then return all the relevant data (values, std errors and chi squared)
 	if(outp == True):
 		print '########## FIT RESULTS ###########'
@@ -46,7 +63,7 @@ def fit_odr (val_x, val_y, val_x2d_err=None, val_y2d_err=None, outp=False):
 	return outodr.beta[0], outodr.sd_beta[0], outodr.beta[1] , outodr.sd_beta[1], outodr.sum_square
 
 ### 2nd Fitting function, this one cannot deal with x-errors, uses LM algorithm
-def fit_lsq (val_x, val_y, val_y2d_err=None, outp=False):
+def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 	val_log_x = []
 	val_log_y = []
 	for i in range(len(val_x)):
@@ -59,7 +76,7 @@ def fit_lsq (val_x, val_y, val_y2d_err=None, outp=False):
 		else:
 			val_log_y.append( m.log10( val_y[i] ) )
 	#Fit with the LM-algorithm from scipy.optimize
-	popt, pcov = optimize.curve_fit( fct_lsq ,val_log_x, val_log_y,absolute_sigma=True, method='lm')
+	popt, pcov = optimize.curve_fit( fct_lsq, val_log_x, val_log_y, absolute_sigma=False, method='lm')
 	perr = np.sqrt(np.diag(pcov))
 	#The chisquared needs to be calculated, as the curve_fit does not have an option to do so...
 	chisq = 0

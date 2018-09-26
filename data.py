@@ -45,7 +45,7 @@ def read_fits( fname , PRINTALL):
 def print_data( cfg, data_low, data_high, data_hyb, alpha):
 	mean = 0.
 	tmp = cfg.get('names','galaxy').split(' ')
-	dataname = tmp[0]+'_'+tmp[1]+'_pixels.dat'
+	dataname = tmp[0]+'_'+tmp[1]+'_pixel.dat'
 	f_tmp = open(dataname, 'w')
 	f_tmp.write('#low freq. radio \t high freq. radio \t hybrid SFR \t spectral index \n' )
 	for i in range(len(data_low)):
@@ -65,7 +65,7 @@ def print_data( cfg, data_low, data_high, data_hyb, alpha):
 def print_conv_data( cfg, data_radio, data_hyb, alpha, case ):
 	mean = 0.
 	tmp = cfg.get('names','galaxy').split(' ')
-	dataname = tmp[0]+'_'+tmp[1]+'_pixels'+case +'.dat'
+	dataname = tmp[0]+'_'+tmp[1]+'_'+ cfg.get('names',case) +'_pixel_conv.dat'
 	f_tmp = open(dataname, 'w')
 	f_tmp.write('#radio SFR \t conv hybrid SFR \t spectral index \n' )
 	for i in range(len(data_radio)):
