@@ -120,5 +120,3 @@ def floor(x):
 	return int(m.floor(x))
 
 
-
-

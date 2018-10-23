@@ -22,6 +22,7 @@ datafiles = [os.path.join(root, name)
 			for root, dirs, files in os.walk(parent)
 			for name in files
 			if name.endswith("results.ini")]
+datafiles.sort()
 
 #Now print all results to file as tab separated values,
 #starting with column descriptions

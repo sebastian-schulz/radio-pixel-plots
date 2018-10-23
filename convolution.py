@@ -16,7 +16,7 @@ def flatten( data ):
 	return data
 
 ###Function that calculates the fit parameter a (slope) as a function of gaussian kernel width sigma
-def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, case):
+def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, CALIB_ERR, case):
 	#Compute new spectral indices (may have changed due to different cutting)
 	conv_alpha = []
 	for i in range(len(pixels_l)):
@@ -40,11 +40,11 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, 
 					if( conv_alpha[i] <= config.getfloat( 'boundaries','low' ) ):
 						conv_alpha_cut.append( conv_alpha[i] )
 						conv_pix_cut.append( conv_pix[i] )
-						conv_pix_cut_err.append( cutoff['sfr'] )
+						conv_pix_cut_err.append( calc_error( conv_pix[i], cutoff['sfr'], CALIB_ERR ) )
 						conv_pix_l_cut.append( pixels_l[i] )
-						conv_pix_l_cut_err.append( cutoff['low'] )
+						conv_pix_l_cut_err.append( calc_error( pixels_l[i], cutoff['low'], CALIB_ERR ) )
 						conv_pix_h_cut.append( pixels_h[i] )
-						conv_pix_h_cut_err.append( cutoff['high'] )
+						conv_pix_h_cut_err.append( calc_error( pixels_h[i], cutoff['high'], CALIB_ERR ) )
 		#Now apply the condon relation to the radio map set via parameter 'opt' and return values
 		###CHANGE TO INCLUDE ERRORS!
 	if(opt == 'high'):
@@ -59,8 +59,8 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, 
 		return conv_pix_cut, conv_pix_cut_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_cut, a_l, b_l
 
 ###Gaussian Kernel function for optimization purposes, because optimize searches for zeros by default
-def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, case ):
-	_,_,_,_,_,x,_ = fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, case)
+def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, CALIB_ERR, case ):
+	_,_,_,_,_,x,_ = fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, CALIB_ERR, case)
 	return x-1.
 
 ###Convolution of the 2d image with gaussian kernel
@@ -91,5 +91,7 @@ def convert_kpc2px(kpc, cfg):
 	return float(kpc * cfg.getfloat('pixel_per_arcsec') / kpc_per_arcsec )
 
 
-
+def calc_error(val, noise, calibration):
+	error = m.sqrt( m.pow(noise,2.) + m.pow(val*calibration,2.) )
+	return error
 

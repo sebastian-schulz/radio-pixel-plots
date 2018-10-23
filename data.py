@@ -5,6 +5,7 @@ from astropy.io import fits
 #Mighty numerical library of ptyhon
 import numpy as np
 
+
 ###Read image from fits file and store it in 2d numpy array
 def read_fits( fname , PRINTALL):
 	#Reading in the image file and checking size as well as shape
@@ -42,18 +43,24 @@ def read_fits( fname , PRINTALL):
 	return data
 
 ###Prints data arrays to file as tab separated values
-def print_data( cfg, data_low, data_high, data_hyb, alpha):
+def print_data( cfg, data_low, data_low_err, data_high, data_high_err, data_hyb, data_hyb_err, alpha):
 	mean = 0.
 	tmp = cfg.get('names','galaxy').split(' ')
 	dataname = tmp[0]+'_'+tmp[1]+'_pixel.dat'
 	f_tmp = open(dataname, 'w')
-	f_tmp.write('#low freq. radio \t high freq. radio \t hybrid SFR \t spectral index \n' )
+	f_tmp.write('#low freq. radio \t error \t high freq. radio \t error \t hybrid SFR \t error \t spectral index \n' )
 	for i in range(len(data_low)):
 		f_tmp.write(str(data_low[i])) #LOFAR / low frequency
 		f_tmp.write('\t')
+		f_tmp.write(str(data_low_err[i])) #errors
+		f_tmp.write('\t')
 		f_tmp.write(str(data_high[i])) #WSRT / high frequency
 		f_tmp.write('\t')
+		f_tmp.write(str(data_high_err[i])) #errors
+		f_tmp.write('\t')
 		f_tmp.write(str(data_hyb[i])) #GALEX/Spitzer hybrid sfr
+		f_tmp.write('\t')
+		f_tmp.write(str(data_hyb_err[i])) #errors
 		f_tmp.write('\t')
 		f_tmp.write(str(alpha[i])) # spectral index
 		f_tmp.write('\n')
@@ -62,23 +69,25 @@ def print_data( cfg, data_low, data_high, data_hyb, alpha):
 	return float(mean)
 
 ###Similar to print data, but for the convolved data
-def print_conv_data( cfg, data_radio, data_hyb, alpha, case ):
+def print_conv_data( cfg, data_radio, data_radio_err, data_hyb, data_hyb_err, alpha, case ):
 	mean = 0.
 	tmp = cfg.get('names','galaxy').split(' ')
 	dataname = tmp[0]+'_'+tmp[1]+'_'+ cfg.get('names',case) +'_pixel_conv.dat'
 	f_tmp = open(dataname, 'w')
-	f_tmp.write('#radio SFR \t conv hybrid SFR \t spectral index \n' )
+	f_tmp.write('#radio SFR \t error \t conv hybrid SFR \t error \t spectral index \n' )
 	for i in range(len(data_radio)):
 		f_tmp.write(str(data_radio[i])) 
 		f_tmp.write('\t')
+		f_tmp.write(str(data_radio_err[i])) 
+		f_tmp.write('\t')
 		f_tmp.write(str(data_hyb[i])) 
+		f_tmp.write('\t')
+		f_tmp.write(str(data_hyb_err[i])) 
 		f_tmp.write('\t')
 		f_tmp.write(str(alpha[i])) 
 		f_tmp.write('\n')
 		mean += data_radio[i]
 	f_tmp.close()
 	return float(mean)
-
-
 
 

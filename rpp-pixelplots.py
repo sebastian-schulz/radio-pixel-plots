@@ -24,8 +24,11 @@ warnings.filterwarnings("ignore")
 PRINTALL = True
 
 #Global variable to set the fitting mechanism, default is lsq, which accepts y-errors and uses Levenberg-Marquart
-#alternatively use option odr to also include x-errors
-FIT_METHOD = 'odr' #'lsq'
+#alternatively use option odr to also include x-errors, LSQ is not working at this time, only odr supported!
+FIT_METHOD = 'odr' #lsq / incl / odr
+
+#rel. calibration error for both radio and sfr maps
+CALIB_ERR = 0.05
 
 #################
 ### FUNCTIONS ###
@@ -34,7 +37,7 @@ FIT_METHOD = 'odr' #'lsq'
 #For more information on what those functions do, check their respective files for documentation
 from plotting import condon, fct_f, fct_result, map_sqrt, plot
 from conversion import ceil, floor, convert_resolution_adv, conv_px_per_box, calculate_rms
-from convolution import convolve_gauss, fct_gauss, fct_gauss_fit, convert_kpc2px, convert_px2kpc, flatten
+from convolution import convolve_gauss, fct_gauss, fct_gauss_fit, convert_kpc2px, convert_px2kpc, flatten, calc_error
 from data import print_conv_data, print_data, read_fits
 from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
 
@@ -154,25 +157,26 @@ sigma = {'low' : sigma_low, 'high' : sigma_high, 'sfr' : sigma_sfr }
 #3 sigma cutoff for all datasets
 # for each dataset, there is a corresponding set containing the errors
 # name is always the same with _err attached
+#ADD ERRORS WITH 5% OF THE PIXEL VALUE!!! m.sqrt( sigma**2 + (value*0.05)**2 )
 for i in range(len(pixels_l)):
 	if(pixels_l[i] > 3. * sigma_low ):
 		if(pixels_h[i] > 3. * sigma_high): 
 			if(pixels_s[i] > 3. * sigma_sfr ):
 					alpha_cut.append(alpha_tmp[i])
 					pix_l_cut.append(pixels_l[i])
-					pix_l_cut_err.append( sigma_low )
+					pix_l_cut_err.append( calc_error( pixels_l[i],sigma_low ,CALIB_ERR ) )
 					pix_h_cut.append(pixels_h[i])
-					pix_h_cut_err.append( sigma_high )
+					pix_h_cut_err.append( calc_error( pixels_h[i],sigma_high ,CALIB_ERR ) )
 					pix_s_cut.append(pixels_s[i])
-					pix_s_cut_err.append( sigma_sfr )
+					pix_s_cut_err.append( calc_error( pixels_s[i],sigma_sfr ,CALIB_ERR ) )
 					if(alpha_tmp[i] < config.getfloat('boundaries','low') ):
 						alpha_fit.append(alpha_tmp[i])
 						pix_l_fit.append(pixels_l[i])
-						pix_l_fit_err.append( sigma_low )
+						pix_l_fit_err.append( calc_error( pixels_l[i],sigma_low ,CALIB_ERR ) )
 						pix_h_fit.append(pixels_h[i])
-						pix_l_cut_err.append( sigma_high )
+						pix_l_cut_err.append( calc_error( pixels_h[i],sigma_high ,CALIB_ERR ) )
 						pix_s_fit.append(pixels_s[i])
-						pix_s_fit_err.append( sigma_sfr )
+						pix_s_fit_err.append( calc_error( pixels_s[i],sigma_sfr ,CALIB_ERR ) )
 
 print 'RMS for the 3 different maps, used as sigma for 3 sigma cutoff:\n', sigma
 
@@ -181,7 +185,7 @@ print 'Number of points in sample:', len( pixels_l )
 print 'Number of points after 3 sigma cutoff:', len( pix_l_cut )
 
 ###Print all pixel data to file (after the 3 sigma cut and before conversion to SFR)
-mean = print_data( config, pix_l_cut, pix_h_cut, pix_s_cut, alpha_cut )
+mean = print_data( config, pix_l_cut, pix_l_cut_err, pix_h_cut, pix_h_cut_err, pix_s_cut, pix_s_cut_err, alpha_cut )
 mean_old = 0
 tmp = flatten( data_l )
 for i in range(len(tmp)):
@@ -238,11 +242,14 @@ a_h , a_h_err , b_h, b_h_err, chi_h = fit(	pix_s_fit,
 ###Finding optimal gaussian kernel for both radio maps
 ### Calculating pixel values and fits based on the optimal kernel
 
+#phi = config.getfloat('values','phi')
+#incl = config.getfloat('values','incl')
+
 ###low frequency radio map
 print 'Finding optimal gaussian kernel for lower freqency data. This may take a moment...'
-optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, FIT_METHOD), maxfev = 20 )
+optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD), maxfev = 20 )
 
-conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, FIT_METHOD )
+conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD )
 
 _, a_l_conv_err, _, _, _ = fit(conv_pix_cut_low, conv_pix_l_cut, val_x_err=conv_pix_cut_low_err, val_y_err=conv_pix_l_cut_err, output=True, case=FIT_METHOD)
 
@@ -252,9 +259,9 @@ print 'Final value for Diffusion length:\t','%0.3f' % optimal_sigma_l[0], 'kpc'
 
 ###high frequency radio map
 print 'Finding optimal gaussian kernel for higher frequency data. This may take a moment...'
-optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'high', PRINTALL, FIT_METHOD ), maxfev = 20 )
+optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD ), maxfev = 20 )
 
-conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0], data_s, pixels_l, pixels_h, sigma, config, 'high', PRINTALL, FIT_METHOD )
+conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0], data_s, pixels_l, pixels_h, sigma, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD )
 
 _, a_h_conv_err, _, _, _ = fit(conv_pix_cut_high, conv_pix_h_cut, val_x_err=conv_pix_cut_high_err, val_y_err=conv_pix_h_cut_err, output=True, case=FIT_METHOD)
 
@@ -272,7 +279,6 @@ print 'Creating final images and writing results to file ...'
 	except:
 		pass
 '''
-#TODO INCLUDE THE REAL ERRORS!!! (arrays not just sigma)
 
 #Plotting low / LOFAR
 plot(pix_s_cut, pix_l_cut, alpha_cut, a_l, b_l, config , 'low', x_err=pix_s_cut_err ,y_err=pix_l_cut_err )
@@ -284,8 +290,8 @@ plot(conv_pix_cut_low, conv_pix_l_cut, conv_alpha_l, a_smooth_l, b_smooth_l, con
 plot(conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, a_smooth_h, b_smooth_h, config, 'conv_high' , optimal_sigma_h[0], x_err=conv_pix_cut_high_err ,y_err=conv_pix_h_cut_err)
 
 ###Print all convolved pixel data to file (after the 3 sigma cut and conversion to SFR)
-mean = print_conv_data( config, conv_pix_cut_low, conv_pix_l_cut , conv_alpha_l ,'conv_low')
-mean = print_conv_data( config, conv_pix_cut_high, conv_pix_h_cut, conv_alpha_h, 'conv_high')
+mean = print_conv_data( config, conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, 'conv_low')
+mean = print_conv_data( config, conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, 'conv_high')
 
 ### Write the final results (fits and diffusion lengths) to file
 # this makes use of the configparser library again 
