@@ -10,13 +10,13 @@ from scipy import odr
 ### Main fitting function, calls one of the 2 possible ones based on case
 def fit(val_x, val_y, val_x_err=None, val_y_err=None, output=False, case='None'):
 	if(case=='lsq'):
-		print 'LSQ fitting is depreceated in this version, please use odr fitting with errors instead!'
+		print('LSQ fitting is depreceated in this version, please use odr fitting with errors instead!')
 		quit()
 		return fit_lsq (val_x, val_y, val_y_err=val_y_err, outp=output)
 	elif(case=='odr'):
 		return fit_odr (val_x, val_y, val_x_err=val_x_err, val_y_err=val_y_err, outp=output)
 	else:
-		print 'Error in fitting function call!'
+		print('Error in fitting function call!')
 		quit()
 
 ###Fitting function with x and y errors see Python Scipy ODR
@@ -47,7 +47,7 @@ def fit_odr (val_x, val_y, val_x_err=None, val_y_err=None, outp=False):
 			val_log_y_err.append( m.log10( val_y_err[i] ) )
 		mydata = odr.RealData( val_log_x, val_log_y, sx=val_log_x_err ,sy=val_log_y_err)
 	else:
-		print 'No errors defined!'
+		print('No errors defined!')
 		mydata = odr.Data( val_log_x, val_log_y )
 	
 	myodr = odr.ODR(mydata, linear, beta0=[1., 0.])
@@ -55,10 +55,10 @@ def fit_odr (val_x, val_y, val_x_err=None, val_y_err=None, outp=False):
 
 	#Print results to screen and then return all the relevant data (values, std errors and chi squared)
 	if(outp == True):
-		print '########## FIT RESULTS ###########'
-		print 'a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0]
-		print 'b =\t','%0.3f' %  outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1]
-		print 'Chi squared = \t','%0.3f' %  outodr.sum_square
+		print('########## FIT RESULTS ###########')
+		print('a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0])
+		print('b =\t','%0.3f' %  outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1])
+		print('Chi squared = \t','%0.3f' %  outodr.sum_square)
 		#print outodr.sum_square_delta, '\t', outodr.sum_square_eps
 	return outodr.beta[0], outodr.sd_beta[0], outodr.beta[1] , outodr.sd_beta[1], outodr.sum_square
 
@@ -84,10 +84,10 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 		chisq += m.pow( fct_lsq(val_log_x[i], popt[0], popt[1]) - val_log_y[i] ,2)
 	
 	if(outp == True):
-		print '########## FIT RESULTS ###########'
-		print 'a =\t', '%0.3f' % popt[0], '+/-\t', '%0.3f' % perr[0]
-		print 'b =\t','%0.3f' %  popt[1], '+/-\t', '%0.3f' % perr[1]
-		print 'Chi squared = \t','%0.3f' % chisq
+		print('########## FIT RESULTS ###########')
+		print('a =\t', '%0.3f' % popt[0], '+/-\t', '%0.3f' % perr[0])
+		print('b =\t','%0.3f' %  popt[1], '+/-\t', '%0.3f' % perr[1])
+		print('Chi squared = \t','%0.3f' % chisq)
 		#print outodr.sum_square_delta, '\t', outodr.sum_square_eps
 	return popt[0], perr[0], popt[1] , perr[1], chisq
 

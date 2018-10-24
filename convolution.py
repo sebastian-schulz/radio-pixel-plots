@@ -3,7 +3,13 @@ import math as m
 #Library for python plotting
 import matplotlib.pyplot as plt
 #Library to manipulate images, used to smooth with gaussian kernel
+import scipy
 from scipy import ndimage
+from scipy.signal import convolve as scipy_convolve
+from scipy.ndimage import convolve as ndimage_convolve
+#Astropy library that builds 2d gauss kernels that are rotated by some agnle theta wrt the coordinate axis
+from astropy.convolution import Gaussian2DKernel
+from astropy.convolution import convolve as astropy_convolve
 
 from conversion import convert_resolution_adv
 from plotting import condon
@@ -16,13 +22,13 @@ def flatten( data ):
 	return data
 
 ###Function that calculates the fit parameter a (slope) as a function of gaussian kernel width sigma
-def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, CALIB_ERR, case):
+def fct_gauss(sigma, phi, data_s, pixels_l, pixels_h, cutoff, incl, config, opt, PRINTALL, CALIB_ERR, case):
 	#Compute new spectral indices (may have changed due to different cutting)
 	conv_alpha = []
 	for i in range(len(pixels_l)):
 		conv_alpha.append( m.log10( m.fabs(pixels_l[i] /pixels_h[i]) ) / m.log10( config.getfloat('values','freq_low') / config.getfloat('values','freq_high') ))
 	#Convolve with gaussian 
-	conv_s2d = convolve_gauss( data_s, config['values'], sigma, opt, PRINTALL )
+	conv_s2d = convolve_gauss( data_s, config['values'], sigma, phi, incl, opt, PRINTALL )
 	conv_pix2d = convert_resolution_adv( conv_s2d, config['values'] )
 	conv_pix = flatten( conv_pix2d )
 	conv_pix_cut = []
@@ -59,18 +65,21 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, 
 		return conv_pix_cut, conv_pix_cut_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_cut, a_l, b_l
 
 ###Gaussian Kernel function for optimization purposes, because optimize searches for zeros by default
-def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, CALIB_ERR, case ):
-	_,_,_,_,_,x,_ = fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, CALIB_ERR, case)
+def fct_gauss_fit(sigma, phi, data_s, pixels_l, pixels_h, cutoff, incl, config, opt, PRINTALL, CALIB_ERR, case ):
+	_,_,_,_,_,x,_ = fct_gauss(sigma, phi, data_s, pixels_l, pixels_h, cutoff, incl, config, opt, PRINTALL, CALIB_ERR, case)
+	#print(x)
 	return x-1.
 
 ###Convolution of the 2d image with gaussian kernel
-###CHECK THE UNITS OF SIGMA HERE!
-def convolve_gauss( data , cfg, sigma_in, opt , PRINTALL):
-	sigma = convert_kpc2px(sigma_in, cfg)
-	if(PRINTALL == True):
-		print 'current sigma:','%0.3f' %  convert_px2kpc(sigma,cfg) , 'in kpc',  '%0.3f' % sigma, 'in px'
-	#Convolution is identical with gaussian_filter, needs standard-deviation/pixel!
-	res = ndimage.filters.gaussian_filter(data, sigma)
+def convolve_gauss(data , cfg, sigma_in, phi_in, incl, opt , PRINTALL):
+	sigma_x = convert_kpc2px(sigma_in, cfg)
+	sigma_y = sigma_x * m.cos(incl)
+	kernel2d = Gaussian2DKernel(sigma_x, y_stddev=sigma_y, theta=phi_in) #x_size= 51, y_size= 51 
+	#res = ndimage_convolve(data, kernel2d) #NOT FFT
+	#res = scipy_convolve(data, kernel2d) #goes to negative values ...NOT FFT
+	#res = scipy.ndimage.gaussian_filter(data, [sigma_x, sigma_y])
+	res = scipy.signal.fftconvolve(data, kernel2d, mode='same')
+	#res = astropy_convolve(data, kernel2d) NOT FFT
 	if( PRINTALL == True ):
 		#Now plot the map (compare to fits file if something doesnt work)
 		plt.imshow(res, cmap='gray')
@@ -79,6 +88,16 @@ def convolve_gauss( data , cfg, sigma_in, opt , PRINTALL):
 		fname_image = 'convolution_'+opt+'.png'
 		plt.savefig( fname_image )
 		plt.clf()
+	if( PRINTALL == True ):
+		#Now plot the map (compare to fits file if something doesnt work)
+		plt.imshow(kernel2d, cmap='gray')
+		plt.colorbar()
+		fname_image = 'convolution_'+opt+'_kernel.png'
+		plt.savefig( fname_image )
+		plt.clf()
+	if(PRINTALL == True):
+		print('current sigma:','%0.3f' % convert_px2kpc(sigma_x, cfg) , 'in kpc', '%0.3f' % sigma_x, 'in px')
+		print('Current value for rotation angle phi:\t', '%0.3f' % m.degrees(phi_in))
 	return res
 
 ### Unit conversion from pixel distance to distance in kiloparsec

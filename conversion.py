@@ -20,8 +20,8 @@ def calculate_rms( data, cfg ):
 	x_min = cfg.getint('center_y') - cfg.getint('size_y') / 2
 	x_max = cfg.getint('center_y') + cfg.getint('size_y') / 2
 	n = cfg.getint('size_x') * cfg.getint('size_y')
-	for i in range( x_min, x_max ):
-		for j in range( y_min, y_max ):
+	for i in range(int(x_min), int(x_max) ):
+		for j in range(int(y_min),int(y_max) ):
 			rms += m.pow( data[i][j] , 2)
 	rms = m.sqrt( rms / n )
 	#print 'ROOT MEAN SQUARE OF BOX: ', rms 

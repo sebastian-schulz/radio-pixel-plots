@@ -25,7 +25,7 @@ PRINTALL = True
 
 #Global variable to set the fitting mechanism, default is lsq, which accepts y-errors and uses Levenberg-Marquart
 #alternatively use option odr to also include x-errors, LSQ is not working at this time, only odr supported!
-FIT_METHOD = 'odr' #lsq / incl / odr
+FIT_METHOD = 'odr' #lsq / odr
 
 #rel. calibration error for both radio and sfr maps
 CALIB_ERR = 0.05
@@ -52,7 +52,7 @@ from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
 
 ###Read in config file from command line argument, exit if it cant be found
 if(len(sys.argv) == 1):
-	print 'Need filname of config file'
+	print('Need filname of config file')
 	sys.exit(-1)
 elif(len(sys.argv)==2):
 	tmp_name = str(sys.argv[1])
@@ -61,22 +61,22 @@ elif(len(sys.argv)==3):
 	if (sys.argv[2] == '0'):
 		PRINTALL = False
 else:
-	print 'Too many command line arguments! Quitting...'
+	print('Too many command line arguments! Quitting...')
 	sys.exit(-1)
-print 'Full output is set to: ', PRINTALL, ' (change through command line)'
-print 'Currently using ', FIT_METHOD, ' as fitting method (change directly in the code).'
+print('Full output is set to: ', PRINTALL, ' (change through command line)')
+print('Currently using ', FIT_METHOD, ' as fitting method (change directly in the code).')
 
 #Read config file, object config works almost like a dictoinary, print everything
 config = configparser.ConfigParser()
 config.read(tmp_name)
 if( PRINTALL == True ):
-	print config.sections()
-	for key in config['names']: print key, ' = ',config['names'][key] 
-	for key in config['values']: print key, ' = ',config['values'][key] 
+	print(config.sections())
+	for key in config['names']: print(key, ' = ',config['names'][key])
+	for key in config['values']: print(key, ' = ',config['values'][key]) 
 
 ###change working directory to data-path (specified in the ini file)
 os.chdir(config['names']['fullpath'])
-print  'Current working directory is:', os.getcwd()
+print('Current working directory is:', os.getcwd())
 
 ###Create png versions of the full fits files, including the (cutting) box using ds9
 ###also includes the 'rmsbox' to calculate the sigmas for the 3 sigma cutoff
@@ -178,11 +178,11 @@ for i in range(len(pixels_l)):
 						pix_s_fit.append(pixels_s[i])
 						pix_s_fit_err.append( calc_error( pixels_s[i],sigma_sfr ,CALIB_ERR ) )
 
-print 'RMS for the 3 different maps, used as sigma for 3 sigma cutoff:\n', sigma
+print('RMS for the 3 different maps, used as sigma for 3 sigma cutoff:\n', sigma)
 
 #Some diagnostic output of how many points were cut
-print 'Number of points in sample:', len( pixels_l ) 
-print 'Number of points after 3 sigma cutoff:', len( pix_l_cut )
+print('Number of points in sample:', len( pixels_l ) )
+print( 'Number of points after 3 sigma cutoff:', len( pix_l_cut ))
 
 ###Print all pixel data to file (after the 3 sigma cut and before conversion to SFR)
 mean = print_data( config, pix_l_cut, pix_l_cut_err, pix_h_cut, pix_h_cut_err, pix_s_cut, pix_s_cut_err, alpha_cut )
@@ -196,8 +196,8 @@ for i in range(len(pixels_l)):
 
 
 mean *=  conv_px_per_box( config['values'] )**2
-print 'Total total sum of lower freq. image:\t', '%0.3f' % mean_old
-print 'Total sum in the cut lower freq. map is:', '%0.3f' % mean
+print('Total total sum of lower freq. image:\t', '%0.3f' % mean_old)
+print('Total sum in the cut lower freq. map is:', '%0.3f' % mean)
 
 ###Now convert lofar and swrt to SFR sufrace density using condon-relation
 pix_l_cut = condon( pix_l_cut, config.getfloat('values','FWHM'), config.getfloat('values','freq_low') )
@@ -242,37 +242,39 @@ a_h , a_h_err , b_h, b_h_err, chi_h = fit(	pix_s_fit,
 ###Finding optimal gaussian kernel for both radio maps
 ### Calculating pixel values and fits based on the optimal kernel
 
-#phi = config.getfloat('values','phi')
-#incl = config.getfloat('values','incl')
+phi = m.radians(config.getfloat('values','phi'))
+incl = m.radians(config.getfloat('values','incl'))
 
 ###low frequency radio map
-print 'Finding optimal gaussian kernel for lower freqency data. This may take a moment...'
-optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD), maxfev = 20 )
+print('Finding optimal gaussian kernel for lower freqency data. This may take a moment...')
+optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD)) 
 
-conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], data_s, pixels_l, pixels_h, sigma , config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD )
+conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD )
+
 
 _, a_l_conv_err, _, _, _ = fit(conv_pix_cut_low, conv_pix_l_cut, val_x_err=conv_pix_cut_low_err, val_y_err=conv_pix_l_cut_err, output=True, case=FIT_METHOD)
 
 #Diffusion length is the FWHM/2 of the final image, FWHM are square added first
 optimal_sigma_l[0] = m.sqrt( m.pow(2.3548 *optimal_sigma_l[0],2) + m.pow(1.2,2) )/2.
-print 'Final value for Diffusion length:\t','%0.3f' % optimal_sigma_l[0], 'kpc'
+print('Final value for Diffusion length:\t','%0.3f' % optimal_sigma_l[0], 'kpc')
 
 ###high frequency radio map
-print 'Finding optimal gaussian kernel for higher frequency data. This may take a moment...'
-optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(data_s, pixels_l, pixels_h, sigma , config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD ), maxfev = 20 )
+print('Finding optimal gaussian kernel for higher frequency data. This may take a moment...')
+optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD ) ) 
 
-conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0], data_s, pixels_l, pixels_h, sigma, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD )
+conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0],phi , data_s, pixels_l, pixels_h, sigma, incl, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD )
 
 _, a_h_conv_err, _, _, _ = fit(conv_pix_cut_high, conv_pix_h_cut, val_x_err=conv_pix_cut_high_err, val_y_err=conv_pix_h_cut_err, output=True, case=FIT_METHOD)
 
 #Diffusion length is the FWHM/2 of the final image, FWHM are square added first
 optimal_sigma_h[0] = m.sqrt( m.pow(2.3548 *optimal_sigma_h[0],2) + m.pow(1.2,2) )/2.
-print 'Final value for Diffusion length:\t', '%0.3f' % optimal_sigma_h[0], 'kpc'
+print('Final value for Diffusion length:\t', '%0.3f' % optimal_sigma_h[0], 'kpc')
+
 
 ############
 ###Finally creating the pixel plots for all the data 
 ############
-print 'Creating final images and writing results to file ...'
+print('Creating final images and writing results to file ...')
 '''if(PRINTALL==True):
 	try:
 		os.system('gnuplot fit_test.gp')
@@ -341,7 +343,7 @@ tmp2 = tmp[0]+'_'+tmp[1]+'_plots_combined.pdf'
 
 os.system('rm *plots_combined.pdf')
 os.system('pdfunite *pdf '+ tmp2 )
-print "Finished!"
+print("Finished!")
 
 
 
