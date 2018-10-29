@@ -97,7 +97,6 @@ def convolve_gauss(data , cfg, sigma_in, phi_in, incl, opt , PRINTALL):
 		plt.clf()
 	if(PRINTALL == True):
 		print('current sigma:','%0.3f' % convert_px2kpc(sigma_x, cfg) , 'in kpc', '%0.3f' % sigma_x, 'in px')
-		print('Current value for rotation angle phi:\t', '%0.3f' % m.degrees(phi_in))
 	return res
 
 ### Unit conversion from pixel distance to distance in kiloparsec
