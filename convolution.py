@@ -4,12 +4,9 @@ import math as m
 import matplotlib.pyplot as plt
 #Library to manipulate images, used to smooth with gaussian kernel
 import scipy
-from scipy import ndimage
-from scipy.signal import convolve as scipy_convolve
-from scipy.ndimage import convolve as ndimage_convolve
 #Astropy library that builds 2d gauss kernels that are rotated by some agnle theta wrt the coordinate axis
 from astropy.convolution import Gaussian2DKernel
-from astropy.convolution import convolve as astropy_convolve
+
 
 from conversion import convert_resolution_adv
 from plotting import condon
@@ -52,7 +49,6 @@ def fct_gauss(sigma, phi, data_s, pixels_l, pixels_h, cutoff, incl, config, opt,
 						conv_pix_h_cut.append( pixels_h[i] )
 						conv_pix_h_cut_err.append( calc_error( pixels_h[i], cutoff['high'], CALIB_ERR ) )
 		#Now apply the condon relation to the radio map set via parameter 'opt' and return values
-		###CHANGE TO INCLUDE ERRORS!
 	if(opt == 'high'):
 		conv_pix_h_cut = condon( conv_pix_h_cut, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
 		conv_pix_h_cut_err = condon( conv_pix_h_cut_err, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
@@ -75,11 +71,7 @@ def convolve_gauss(data , cfg, sigma_in, phi_in, incl, opt , PRINTALL):
 	sigma_x = convert_kpc2px(sigma_in, cfg)
 	sigma_y = sigma_x * m.cos(incl)
 	kernel2d = Gaussian2DKernel(sigma_x, y_stddev=sigma_y, theta=phi_in) #x_size= 51, y_size= 51 
-	#res = ndimage_convolve(data, kernel2d) #NOT FFT
-	#res = scipy_convolve(data, kernel2d) #goes to negative values ...NOT FFT
-	#res = scipy.ndimage.gaussian_filter(data, [sigma_x, sigma_y])
 	res = scipy.signal.fftconvolve(data, kernel2d, mode='same')
-	#res = astropy_convolve(data, kernel2d) NOT FFT
 	if( PRINTALL == True ):
 		#Now plot the map (compare to fits file if something doesnt work)
 		plt.imshow(res, cmap='gray')

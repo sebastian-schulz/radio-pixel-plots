@@ -24,7 +24,7 @@ def calculate_rms( data, cfg ):
 		for j in range(int(y_min),int(y_max) ):
 			rms += m.pow( data[i][j] , 2)
 	rms = m.sqrt( rms / n )
-	#print 'ROOT MEAN SQUARE OF BOX: ', rms 
+	#print('ROOT MEAN SQUARE OF BOX: ', rms)
 	return rms
 
 ###Converts 2d array (image) to pixels of 1.2kpc length and cuts it to the given box size; basically produces a smaller and lower-resolution version
@@ -91,8 +91,8 @@ loop over all p'
 			factor_max_y = m.fabs( floor(pix_y_max) - pix_y_max )
 			factor_min_y = m.fabs( ceil(pix_y_min) - pix_y_min )
 			#if (factor_max_x > 1 or factor_max_y > 1 or factor_min_x > 1 or factor_min_y > 1):
-			#	print ' ERROR!'
-			#print 'x and y factors \t', factor_max_x, '\t', factor_max_y
+			#	print( 'ERROR!')
+			#print('x and y factors \t', factor_max_x, '\t', factor_max_y)
 			for p_y in range( ceil( pix_y_min ), floor( pix_y_max ), 1):
 				N += factor_min_x + factor_max_x
 				pixels[ x, y ] += data[floor( pix_x_min ) ,p_y ] * factor_min_x
@@ -109,7 +109,7 @@ loop over all p'
 			pixels[ x, y ] += data[ ceil(pix_x_max), floor(pix_y_min) ] * factor_max_x * factor_min_y
 			N += factor_min_x * factor_min_y + factor_min_x *factor_max_y +factor_max_x * factor_max_y + factor_max_x * factor_min_y
 	#if(PRINTALL==True ):
-	#print 'Total number of original pixels used in conv:\t', N
+	#print( 'Total number of original pixels used in conv:\t', N)
 	return pixels / (px_per_box)**2
 
 #Custom defined ceiling and floor functions with int as return type

@@ -41,17 +41,6 @@ def condon( x, fwhm, freq ):
 def fct_f (x):
 	return x
 
-###Function with Volkers (gnuplot) best fit values JUST FOR TESTING NGC5194
-### needs 'case' parameter = low LOFAR or =high WSRT
-def fct_volker(x, case):
-	if(case=='low'):
-		return x**0.51 *10**-0.69
-	elif(case=='high'):
-		return x**0.76 *10**-0.08
-	else:
-		print('Value error for gnuplot fit!')
-		return 0.
-
 ###Exponential function to correctly plot the linear (log-log) fit
 def fct_result(x, a, b):
 	return x**a * 10**b
@@ -119,8 +108,6 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None, x_err=None, y_err=Non
 	ax.plot( t, fct_f(t) ,linestyle='--', label=l4)
 	ax.plot(t, fct_result(t, a, b) , linestyle='-', label=l5)
 	ax.errorbar( val_outlier_x, val_outlier_y, xerr=val_outlier_x_err, yerr=val_outlier_y_err, marker='.', linestyle='None', color='tab:gray', label=l6)
-	#if(case == 'high' or case == 'low'):
-	#	plt.loglog(t, fct_volker(t, case) , linestyle='-.')
 	#Create a legend, labels ... be careful with latex symbols ...
 	ax.legend()
 

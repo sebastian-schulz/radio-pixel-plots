@@ -23,8 +23,7 @@ warnings.filterwarnings("ignore")
 #can be set to True as a second command line argument
 PRINTALL = True
 
-#Global variable to set the fitting mechanism, default is lsq, which accepts y-errors and uses Levenberg-Marquart
-#alternatively use option odr to also include x-errors, LSQ is not working at this time, only odr supported!
+#The fitting function supported other fitting methods earlier, this is no longer the case! (too much work maintaining the different fitting methods). DO NOT CHANGE
 FIT_METHOD = 'odr' #lsq / odr
 
 #rel. calibration error for both radio and sfr maps
@@ -149,10 +148,12 @@ alpha_fit = []
 sigma_high = calculate_rms( data_h, config['high_cutoff_box'])
 sigma_low = calculate_rms( data_l, config['low_cutoff_box'])
 sigma_sfr = calculate_rms( data_s, config['sfr_cutoff_box'])
+
 #Use these lines if you want to change the cutoff directly *quick and dirty*
 #sigma_high /= 10.
 #sigma_low /= 10.
 #sigma_sfr /= 10.
+
 sigma = {'low' : sigma_low, 'high' : sigma_high, 'sfr' : sigma_sfr }
 #3 sigma cutoff for all datasets
 # for each dataset, there is a corresponding set containing the errors

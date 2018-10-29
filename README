@@ -1,10 +1,35 @@
-This is a collection of python scripts in order to analyze radio maps (i.e. from LOFAR) and calculate star formation rate maps from this maps (using the condon relation)
-In a second step it also 'simulates' the fact radio maps should be smeared out compared to sfr maps (due to cosmic ray diffusion). Therefor it covolves the radio maps with a gaussian kernel and fits the kernels sigma so that the two star formation rates match.
+ABOUT THE PROGRAMM
+This is a collection of python scripts in order to analyze radio maps (i.e. from LOFAR) and calculate star formation rates using the condon relation. You will always need two different radio maps with different frequencies, but same size and resolution. You also need a star formation map (again same size and resolution).
 
-The main program is called 'rpp-pixelplots.py'. It needs the radio maps to be in the same directory. You also need to update the config file to your paths and fill in data of the galaxy you want to analyze. A default file for NGC 5194 is provided in the radio-pixel-plots folder (called n5194.ini).
+The script then uses the two radio maps to calculate the spectral index 'alpha' in order to cut out thermal radio emmissions. The radio maps are then changed to a pixel size of 1200pc and (after converting to SFR via condon) plotted vs the corresponding pixels from the SFR map.
 
-usage then is $: python pixelplots.py <path to config file>
+In a second step uses a gaussian filter to smear out the sfr map. This models  simple diffusion of the electrons in the galaxy. The width of the filter 'sigma' is fitted to reach best possible agreement with the condon relation. The sigma is directly proportional to the diffusion length.
 
-rpp-compare.py is a standalone script that will write all the resulting data (if you ran pixelplots.py for many different galaxies) into one tab separated file for further analysis. More functionality will be added ...
+This is an experimental version of the code. It uses an elliptical gaussian filter (2D gauss filter with sigma_x != sigma_y) to try to correct the errors introduced by (high) inclination.
 
+HOW IT WORKS
+The main program is called 'rpp-pixelplots.py'. It needs the radio maps to be in the same directory. You also need to update the config file to your paths and fill in data of the galaxy you want to analyze. A default file for NGC XXXX is provided in the radio-pixel-plots folder (called nXXXX.ini).
+
+usage then is $: python3 pixelplots.py <path to config file>
+
+rpp-compare.py is a standalone script that will write all the resulting data (if you ran pixelplots.py for many different galaxies) into one tab separated file for further analysis. 
+
+FURTHER READING
 A more in depth documentation will be provided in the future. Also check the code for documentation on how exactly it works.
+
+ADDITIONAL REQUIREMENTS
+must run with python3, python2 not supported by all the packages used
+This programm requires SAOs DS9 version 8 or later to run. Available at: http://ds9.si.edu/site/Beta.html
+List of python packages used:
+	numpy
+	math
+	matplotlib
+	scipy
+	astropy
+	configparser
+	os
+	sys
+	subprocess
+	warnings
+
+

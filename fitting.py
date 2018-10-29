@@ -9,11 +9,7 @@ from scipy import odr
 
 ### Main fitting function, calls one of the 2 possible ones based on case
 def fit(val_x, val_y, val_x_err=None, val_y_err=None, output=False, case='None'):
-	if(case=='lsq'):
-		print('LSQ fitting is depreceated in this version, please use odr fitting with errors instead!')
-		quit()
-		return fit_lsq (val_x, val_y, val_y_err=val_y_err, outp=output)
-	elif(case=='odr'):
+	if(case=='odr'):
 		return fit_odr (val_x, val_y, val_x_err=val_x_err, val_y_err=val_y_err, outp=output)
 	else:
 		print('Error in fitting function call!')
@@ -59,7 +55,6 @@ def fit_odr (val_x, val_y, val_x_err=None, val_y_err=None, outp=False):
 		print('a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0])
 		print('b =\t','%0.3f' %  outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1])
 		print('Chi squared = \t','%0.3f' %  outodr.sum_square)
-		#print outodr.sum_square_delta, '\t', outodr.sum_square_eps
 	return outodr.beta[0], outodr.sd_beta[0], outodr.beta[1] , outodr.sd_beta[1], outodr.sum_square
 
 ### 2nd Fitting function, this one cannot deal with x-errors, uses LM algorithm
@@ -88,8 +83,7 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 		print('a =\t', '%0.3f' % popt[0], '+/-\t', '%0.3f' % perr[0])
 		print('b =\t','%0.3f' %  popt[1], '+/-\t', '%0.3f' % perr[1])
 		print('Chi squared = \t','%0.3f' % chisq)
-		#print outodr.sum_square_delta, '\t', outodr.sum_square_eps
-	return popt[0], perr[0], popt[1] , perr[1], chisq
+return popt[0], perr[0], popt[1] , perr[1], chisq
 
 ###Linear model for ODR-fit
 def fct_odr(B, val_x):
