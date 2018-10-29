@@ -68,7 +68,7 @@ def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTA
 def convolve_gauss( data , cfg, sigma_in, opt , PRINTALL):
 	sigma = convert_kpc2px(sigma_in, cfg)
 	if(PRINTALL == True):
-		print 'current sigma:','%0.3f' %  convert_px2kpc(sigma,cfg) , 'in kpc',  '%0.3f' % sigma, 'in px'
+		print('current sigma:','%0.3f' %  convert_px2kpc(sigma,cfg) , 'in kpc',  '%0.3f' % sigma, 'in px')
 	#Convolution is identical with gaussian_filter, needs standard-deviation/pixel!
 	res = ndimage.filters.gaussian_filter(data, sigma)
 	if( PRINTALL == True ):

@@ -11,7 +11,7 @@ import sys
 import re
 
 if(len(sys.argv) != 2 ):
-	print 'Need path to parent directory of results!'
+	print('Need path to parent directory of results!')
 	sys.exit(-1)
 
 parent = str(sys.argv[1])
@@ -27,7 +27,7 @@ datafiles.sort()
 #Now print all results to file as tab separated values,
 #starting with column descriptions
 for i in range(len(datafiles)):
-	print datafiles[i]
+	print(datafiles[i])
 outfile = open(parent+'/comparison.dat', 'w')
 outfile.write(	'Galaxy name\t'+
 		'low\t'+
@@ -44,7 +44,7 @@ outfile.write(	'Galaxy name\t'+
 		'chi_sqr\t'+
 		'l low\t'+
 		'a err\t'+
-		'l low\t'+
+		'l high\t'+
 		'a err\n')
 
 #Now write the actual data 

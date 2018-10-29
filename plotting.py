@@ -49,7 +49,7 @@ def fct_volker(x, case):
 	elif(case=='high'):
 		return x**0.76 *10**-0.08
 	else:
-		print 'Value error for gnuplot fit!'
+		print('Value error for gnuplot fit!')
 		return 0.
 
 ###Exponential function to correctly plot the linear (log-log) fit
