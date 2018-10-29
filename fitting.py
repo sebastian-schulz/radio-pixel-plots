@@ -9,14 +9,10 @@ from scipy import odr
 
 ### Main fitting function, calls one of the 2 possible ones based on case
 def fit(val_x, val_y, val_x_err=None, val_y_err=None, output=False, case='None'):
-	if(case=='lsq'):
-		print('LSQ fitting is depreceated in this version, please use odr fitting with errors instead!')
-		quit()
-		return fit_lsq (val_x, val_y, val_y_err=val_y_err, outp=output)
-	elif(case=='odr'):
+	if(case=='odr'):
 		return fit_odr (val_x, val_y, val_x_err=val_x_err, val_y_err=val_y_err, outp=output)
 	else:
-		print('Error in fitting function call!')
+		print('Error in fitting function call! (probably tried to call an depreceated fitting method)')
 		quit()
 
 ###Fitting function with x and y errors see Python Scipy ODR
@@ -59,7 +55,6 @@ def fit_odr (val_x, val_y, val_x_err=None, val_y_err=None, outp=False):
 		print('a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0])
 		print('b =\t','%0.3f' %  outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1])
 		print('Chi squared = \t','%0.3f' %  outodr.sum_square)
-		#print outodr.sum_square_delta, '\t', outodr.sum_square_eps
 	return outodr.beta[0], outodr.sd_beta[0], outodr.beta[1] , outodr.sd_beta[1], outodr.sum_square
 
 ### 2nd Fitting function, this one cannot deal with x-errors, uses LM algorithm
@@ -78,7 +73,7 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 	#Fit with the LM-algorithm from scipy.optimize
 	popt, pcov = optimize.curve_fit( fct_lsq, val_log_x, val_log_y, absolute_sigma=False, method='lm')
 	perr = np.sqrt(np.diag(pcov))
-	#The chisquared needs to be calculated, as the curve_fit does not have an option to do so...
+	#The chisquared needs to be calculated, as the curve_fit does not have an option to do so automatically
 	chisq = 0
 	for i in range(len(val_log_x)):
 		chisq += m.pow( fct_lsq(val_log_x[i], popt[0], popt[1]) - val_log_y[i] ,2)
@@ -88,16 +83,12 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 		print('a =\t', '%0.3f' % popt[0], '+/-\t', '%0.3f' % perr[0])
 		print('b =\t','%0.3f' %  popt[1], '+/-\t', '%0.3f' % perr[1])
 		print('Chi squared = \t','%0.3f' % chisq)
-		#print outodr.sum_square_delta, '\t', outodr.sum_square_eps
 	return popt[0], perr[0], popt[1] , perr[1], chisq
 
 ###Linear model for ODR-fit
 def fct_odr(B, val_x):
 	return B[0]*val_x+B[1]
 
-###Linear model for LSQ-fit
-def fct_lsq(val_x, B0, B1 ):
-	return B0*val_x+B1
 
 
 

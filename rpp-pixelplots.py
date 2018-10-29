@@ -23,9 +23,8 @@ warnings.filterwarnings("ignore")
 #can be set to True as a second command line argument
 PRINTALL = True
 
-#Global variable to set the fitting mechanism, default is lsq, which accepts y-errors and uses Levenberg-Marquart
-#alternatively use option odr to also include x-errors, LSQ is not working at this time, only odr supported!
-FIT_METHOD = 'odr' #lsq / incl / odr
+#The fitting function supported other fitting methods earlier, this is no longer the case! (too much work maintaining the different fitting methods). DO NOT CHANGE
+FIT_METHOD = 'odr'
 
 #rel. calibration error for both radio and sfr maps
 CALIB_ERR = 0.05
@@ -64,7 +63,7 @@ else:
 	print('Too many command line arguments! Quitting...')
 	sys.exit(-1)
 print('Full output is set to: ', PRINTALL, ' (change through command line)')
-print('Currently using ', FIT_METHOD, ' as fitting method (change directly in the code).')
+#print('Currently using ', FIT_METHOD, ' as fitting method (change directly in the code).')
 
 #Read config file, object config works almost like a dictoinary, print everything
 config = configparser.ConfigParser()
@@ -149,15 +148,16 @@ alpha_fit = []
 sigma_high = calculate_rms( data_h, config['high_cutoff_box'])
 sigma_low = calculate_rms( data_l, config['low_cutoff_box'])
 sigma_sfr = calculate_rms( data_s, config['sfr_cutoff_box'])
+
 #Use these lines if you want to change the cutoff directly *quick and dirty*
 #sigma_high /= 10.
 #sigma_low /= 10.
 #sigma_sfr /= 10.
+
 sigma = {'low' : sigma_low, 'high' : sigma_high, 'sfr' : sigma_sfr }
 #3 sigma cutoff for all datasets
 # for each dataset, there is a corresponding set containing the errors
 # name is always the same with _err attached
-#ADD ERRORS WITH 5% OF THE PIXEL VALUE!!! m.sqrt( sigma**2 + (value*0.05)**2 )
 for i in range(len(pixels_l)):
 	if(pixels_l[i] > 3. * sigma_low ):
 		if(pixels_h[i] > 3. * sigma_high): 

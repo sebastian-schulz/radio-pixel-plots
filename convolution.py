@@ -46,7 +46,6 @@ def fct_gauss(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTALL, 
 						conv_pix_h_cut.append( pixels_h[i] )
 						conv_pix_h_cut_err.append( calc_error( pixels_h[i], cutoff['high'], CALIB_ERR ) )
 		#Now apply the condon relation to the radio map set via parameter 'opt' and return values
-		###CHANGE TO INCLUDE ERRORS!
 	if(opt == 'high'):
 		conv_pix_h_cut = condon( conv_pix_h_cut, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
 		conv_pix_h_cut_err = condon( conv_pix_h_cut_err, config.getfloat('values','FWHM'), config.getfloat('values','freq_high') )
@@ -64,12 +63,11 @@ def fct_gauss_fit(sigma, data_s, pixels_l, pixels_h, cutoff, config, opt, PRINTA
 	return x-1.
 
 ###Convolution of the 2d image with gaussian kernel
-###CHECK THE UNITS OF SIGMA HERE!
 def convolve_gauss( data , cfg, sigma_in, opt , PRINTALL):
 	sigma = convert_kpc2px(sigma_in, cfg)
 	if(PRINTALL == True):
 		print('current sigma:','%0.3f' %  convert_px2kpc(sigma,cfg) , 'in kpc',  '%0.3f' % sigma, 'in px')
-	#Convolution is identical with gaussian_filter, needs standard-deviation/pixel!
+	#Convolution is identical with gaussian_filter, needs standard-deviation in pixels!
 	res = ndimage.filters.gaussian_filter(data, sigma)
 	if( PRINTALL == True ):
 		#Now plot the map (compare to fits file if something doesnt work)
@@ -90,7 +88,7 @@ def convert_kpc2px(kpc, cfg):
 	kpc_per_arcsec = cfg.getfloat('distance') * m.tan( 2 * m.pi / (360.* 3600.) ) / 1000.
 	return float(kpc * cfg.getfloat('pixel_per_arcsec') / kpc_per_arcsec )
 
-
+### Calculate the error for each value based on background noise and a calibration error that depends on the magnitude of the value
 def calc_error(val, noise, calibration):
 	error = m.sqrt( m.pow(noise,2.) + m.pow(val*calibration,2.) )
 	return error

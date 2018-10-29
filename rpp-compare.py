@@ -7,8 +7,6 @@ import os
 #System tools (file in and output ...)
 import sys
 
-#Regualar expressions in python - yay!
-import re
 
 if(len(sys.argv) != 2 ):
 	print('Need path to parent directory of results!')

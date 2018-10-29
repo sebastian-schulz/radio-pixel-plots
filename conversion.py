@@ -24,7 +24,7 @@ def calculate_rms( data, cfg ):
 		for j in range( int(y_min), int(y_max) ):
 			rms += m.pow( data[i][j] , 2)
 	rms = m.sqrt( rms / n )
-	#print 'ROOT MEAN SQUARE OF BOX: ', rms 
+	#print('ROOT MEAN SQUARE OF BOX: ', rms)
 	return rms
 
 ###Converts 2d array (image) to pixels of 1.2kpc length and cuts it to the given box size; basically produces a smaller and lower-resolution version

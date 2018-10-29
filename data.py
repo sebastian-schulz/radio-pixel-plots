@@ -17,7 +17,7 @@ def read_fits( fname , PRINTALL):
 		pass
 	if (PRINTALL == True):
 		#Check for size and shape of the array
-		#print 'Data type and shape of', fname ,':',type(data), data.shape 
+		#print( 'Data type and shape of', fname ,':',type(data), data.shape ) 
 		#Now plot all the map (compare to fits file if something doesnt work)
 		
 		#first create a histogram with 1e6 bins to set the z-scale to 90%
@@ -32,7 +32,7 @@ def read_fits( fname , PRINTALL):
 			if( cmax > total * .99 ):
 				break
 			i += 1
-		#print str(i)+'\n'+str(edges[i])
+		#print(str(i)+'\n'+str(edges[i]))
 		#Create the plot with boundaries between 0 and 99% of the histogram
 		plt.imshow(data, cmap='gray', clim=( 0 , edges[i] ) )
 		plt.colorbar()
