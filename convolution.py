@@ -3,11 +3,11 @@ import math as m
 #Library for python plotting
 import matplotlib.pyplot as plt
 #Library to manipulate images, used to smooth with gaussian kernel
-import scipy
+#import scipy
 #Astropy library that builds 2d gauss kernels that are rotated by some agnle theta wrt the coordinate axis
 from astropy.convolution import Gaussian2DKernel
-
-
+from astropy.convolution import convolve_fft as ap_convole
+#convolve or convolve_fft ?
 from conversion import convert_resolution_adv
 from plotting import condon
 from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
@@ -68,10 +68,10 @@ def fct_gauss_fit(sigma, phi, data_s, pixels_l, pixels_h, cutoff, incl, config, 
 
 ###Convolution of the 2d image with gaussian kernel
 def convolve_gauss(data , cfg, sigma_in, phi_in, incl, opt , PRINTALL):
-	sigma_x = convert_kpc2px(sigma_in, cfg)
-	sigma_y = sigma_x * m.cos(incl)
+	sigma_y = convert_kpc2px(sigma_in, cfg)
+	sigma_x = sigma_y * m.cos(incl)
 	kernel2d = Gaussian2DKernel(sigma_x, y_stddev=sigma_y, theta=phi_in) #x_size= 51, y_size= 51 
-	res = scipy.signal.fftconvolve(data, kernel2d, mode='same')
+	res = ap_convole(data, kernel2d, )
 	if( PRINTALL == True ):
 		#Now plot the map (compare to fits file if something doesnt work)
 		plt.imshow(res, cmap='gray')
@@ -84,11 +84,12 @@ def convolve_gauss(data , cfg, sigma_in, phi_in, incl, opt , PRINTALL):
 		#Now plot the map (compare to fits file if something doesnt work)
 		plt.imshow(kernel2d, cmap='gray')
 		plt.colorbar()
+		plt.gca().invert_yaxis()
 		fname_image = 'convolution_'+opt+'_kernel.png'
 		plt.savefig( fname_image )
 		plt.clf()
 	if(PRINTALL == True):
-		print('current sigma:','%0.3f' % convert_px2kpc(sigma_x, cfg) , 'in kpc', '%0.3f' % sigma_x, 'in px')
+		print('current sigma:','%0.3f' % convert_px2kpc(sigma_y, cfg) , 'in kpc', '%0.3f' % sigma_y, 'in px')
 	return res
 
 ### Unit conversion from pixel distance to distance in kiloparsec

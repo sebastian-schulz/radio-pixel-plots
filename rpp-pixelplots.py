@@ -248,7 +248,7 @@ incl = m.radians(config.getfloat('values','incl'))
 
 ###low frequency radio map
 print('Finding optimal gaussian kernel for lower freqency data. This may take a moment...')
-optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD)) 
+optimal_sigma_l = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD), maxfev=20) 
 
 conv_pix_cut_low, conv_pix_cut_low_err, conv_pix_l_cut, conv_pix_l_cut_err, conv_alpha_l, a_smooth_l, b_smooth_l = fct_gauss(optimal_sigma_l[0], phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'low', PRINTALL, CALIB_ERR, FIT_METHOD )
 
@@ -261,7 +261,7 @@ print('Final value for Diffusion length:\t','%0.3f' % optimal_sigma_l[0], 'kpc')
 
 ###high frequency radio map
 print('Finding optimal gaussian kernel for higher frequency data. This may take a moment...')
-optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD ) ) 
+optimal_sigma_h = optimize.fsolve(fct_gauss_fit, config.getfloat('values','sigma_conv'), args=(phi, data_s, pixels_l, pixels_h, sigma, incl, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD ), maxfev=20 ) 
 
 conv_pix_cut_high, conv_pix_cut_high_err, conv_pix_h_cut, conv_pix_h_cut_err, conv_alpha_h, a_smooth_h, b_smooth_h = fct_gauss(optimal_sigma_h[0],phi , data_s, pixels_l, pixels_h, sigma, incl, config, 'high', PRINTALL, CALIB_ERR, FIT_METHOD )
 

@@ -83,7 +83,7 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 		print('a =\t', '%0.3f' % popt[0], '+/-\t', '%0.3f' % perr[0])
 		print('b =\t','%0.3f' %  popt[1], '+/-\t', '%0.3f' % perr[1])
 		print('Chi squared = \t','%0.3f' % chisq)
-return popt[0], perr[0], popt[1] , perr[1], chisq
+	return popt[0], perr[0], popt[1] , perr[1], chisq
 
 ###Linear model for ODR-fit
 def fct_odr(B, val_x):
