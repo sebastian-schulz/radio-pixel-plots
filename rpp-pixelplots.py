@@ -38,7 +38,7 @@ from plotting import condon, fct_f, fct_result, map_sqrt, plot
 from conversion import ceil, floor, convert_resolution_adv, conv_px_per_box, calculate_rms
 from convolution import convolve_gauss, fct_gauss, fct_gauss_fit, convert_kpc2px, convert_px2kpc, flatten, calc_error
 from data import print_conv_data, print_data, read_fits
-from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
+from fitting import fct_odr, fit_lsq, fit_odr, fit #fct_lsq
 
 ###########################
 ### PROGRAM STARTS HERE ###
@@ -241,9 +241,6 @@ a_h , a_h_err , b_h, b_h_err, chi_h = fit(	pix_s_fit,
 
 ###Finding optimal gaussian kernel for both radio maps
 ### Calculating pixel values and fits based on the optimal kernel
-
-#phi = config.getfloat('values','phi')
-#incl = config.getfloat('values','incl')
 
 ###low frequency radio map
 print('Finding optimal gaussian kernel for lower freqency data. This may take a moment...')

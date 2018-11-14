@@ -7,7 +7,7 @@ from scipy import ndimage
 
 from conversion import convert_resolution_adv
 from plotting import condon
-from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
+from fitting import fct_odr, fit_lsq, fit_odr, fit #fct_lsq
 
 ###Flatten 2D arrays in to a long list; this is easier to plot
 def flatten( data ):
