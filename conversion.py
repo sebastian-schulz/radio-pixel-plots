@@ -30,7 +30,7 @@ def calculate_rms( data, cfg ):
 ###Converts 2d array (image) to pixels of 1.2kpc length and cuts it to the given box size; basically produces a smaller and lower-resolution version
 def convert1200( data, cfg ):
 	px_per_box = conv_px_per_box( cfg )
-	#calculate starting positions (bottom left corner) in pixels
+	'''calculate starting positions (bottom left corner) in pixels'''
 	s_x = cfg.getint('center_x') - cfg.getint('n_boxes') / 2 * int( px_per_box )
 	s_y = cfg.getint('center_y') - cfg.getint('n_boxes') / 2 * int( px_per_box )
 	#Creating empty array to store newly created image
@@ -53,10 +53,11 @@ bottom left x = center_x - px_per_box * n_boxes/2
 same for y
 loop over all p'
 	loop over p inside p'
-		go to bottom left corner
-		find pixel p fully inside
-		same for top right corner
-		-> calculate sum of all pixels fully inside
+		go to bottom left corner,
+		find pixel p fully inside,
+		same for top right corner,
+		-> calculate sum of all pixels fully inside,
+        
 		now borders:
 		4 corners
 		2 edges horizontal
