@@ -13,7 +13,7 @@ rc('font',**{'family':'serif','serif':['T1']})# T1 is the LaTex standard font, a
 rc('text', usetex=True)
 
 ###Prints a map of the 1200pc pixel data (with sqrt(values) for better visibility)
-### only used to debug/compare with volker
+### used for debug purposes
 def map_sqrt(pixels , cfg, galaxyname ):
 	tmp = np.zeros(shape = ( len(pixels), len(pixels)) )
 	for i in range(len(pixels)):
@@ -108,7 +108,10 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None, x_err=None, y_err=Non
 	ax.plot( t, fct_f(t) ,linestyle='--', label=l4)
 	ax.plot(t, fct_result(t, a, b) , linestyle='-', label=l5)
 	ax.errorbar( val_outlier_x, val_outlier_y, xerr=val_outlier_x_err, yerr=val_outlier_y_err, marker='.', linestyle='None', color='tab:gray', label=l6)
+<<<<<<< HEAD
 	#Create a legend, labels ... be careful with latex symbols ...
+=======
+>>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
 	ax.legend()
 
 	ax.set_xscale("log", nonposx='clip')

@@ -20,8 +20,13 @@ def calculate_rms( data, cfg ):
 	x_min = cfg.getint('center_y') - cfg.getint('size_y') / 2
 	x_max = cfg.getint('center_y') + cfg.getint('size_y') / 2
 	n = cfg.getint('size_x') * cfg.getint('size_y')
+<<<<<<< HEAD
 	for i in range(int(x_min), int(x_max) ):
 		for j in range(int(y_min),int(y_max) ):
+=======
+	for i in range( int(x_min), int(x_max) ):
+		for j in range( int(y_min), int(y_max) ):
+>>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
 			rms += m.pow( data[i][j] , 2)
 	rms = m.sqrt( rms / n )
 	#print('ROOT MEAN SQUARE OF BOX: ', rms)
@@ -30,7 +35,7 @@ def calculate_rms( data, cfg ):
 ###Converts 2d array (image) to pixels of 1.2kpc length and cuts it to the given box size; basically produces a smaller and lower-resolution version
 def convert1200( data, cfg ):
 	px_per_box = conv_px_per_box( cfg )
-	#calculate starting positions (bottom left corner) in pixels
+	'''calculate starting positions (bottom left corner) in pixels'''
 	s_x = cfg.getint('center_x') - cfg.getint('n_boxes') / 2 * int( px_per_box )
 	s_y = cfg.getint('center_y') - cfg.getint('n_boxes') / 2 * int( px_per_box )
 	#Creating empty array to store newly created image
@@ -53,10 +58,11 @@ bottom left x = center_x - px_per_box * n_boxes/2
 same for y
 loop over all p'
 	loop over p inside p'
-		go to bottom left corner
-		find pixel p fully inside
-		same for top right corner
-		-> calculate sum of all pixels fully inside
+		go to bottom left corner,
+		find pixel p fully inside,
+		same for top right corner,
+		-> calculate sum of all pixels fully inside,
+        
 		now borders:
 		4 corners
 		2 edges horizontal

@@ -12,7 +12,11 @@ def fit(val_x, val_y, val_x_err=None, val_y_err=None, output=False, case='None')
 	if(case=='odr'):
 		return fit_odr (val_x, val_y, val_x_err=val_x_err, val_y_err=val_y_err, outp=output)
 	else:
+<<<<<<< HEAD
 		print('Error in fitting function call!')
+=======
+		print('Error in fitting function call! (probably tried to call an depreceated fitting method)')
+>>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
 		quit()
 
 ###Fitting function with x and y errors see Python Scipy ODR
@@ -73,7 +77,7 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 	#Fit with the LM-algorithm from scipy.optimize
 	popt, pcov = optimize.curve_fit( fct_lsq, val_log_x, val_log_y, absolute_sigma=False, method='lm')
 	perr = np.sqrt(np.diag(pcov))
-	#The chisquared needs to be calculated, as the curve_fit does not have an option to do so...
+	#The chisquared needs to be calculated, as the curve_fit does not have an option to do so automatically
 	chisq = 0
 	for i in range(len(val_log_x)):
 		chisq += m.pow( fct_lsq(val_log_x[i], popt[0], popt[1]) - val_log_y[i] ,2)
@@ -89,9 +93,6 @@ def fit_lsq (val_x, val_y, val_y_err=None, outp=False):
 def fct_odr(B, val_x):
 	return B[0]*val_x+B[1]
 
-###Linear model for LSQ-fit
-def fct_lsq(val_x, B0, B1 ):
-	return B0*val_x+B1
 
 
 

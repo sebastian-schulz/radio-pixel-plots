@@ -17,7 +17,11 @@ def read_fits( fname , PRINTALL):
 		pass
 	if (PRINTALL == True):
 		#Check for size and shape of the array
+<<<<<<< HEAD
 		#print('Data type and shape of', fname ,':',type(data), data.shape )
+=======
+		#print( 'Data type and shape of', fname ,':',type(data), data.shape ) 
+>>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
 		#Now plot all the map (compare to fits file if something doesnt work)
 		
 		#first create a histogram with 1e6 bins to set the z-scale to 90%

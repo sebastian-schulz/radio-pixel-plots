@@ -10,7 +10,7 @@ from astropy.convolution import convolve_fft as ap_convole
 #convolve or convolve_fft ?
 from conversion import convert_resolution_adv
 from plotting import condon
-from fitting import fct_odr, fit_lsq, fit_odr, fit #fct_lsq
+from fitting import fct_lsq, fct_odr, fit_lsq, fit_odr, fit
 
 ###Flatten 2D arrays in to a long list; this is easier to plot
 def flatten( data ):
@@ -67,20 +67,11 @@ def fct_gauss_fit(sigma, phi, data_s, pixels_l, pixels_h, cutoff, incl, config, 
 	return x-1.
 
 ###Convolution of the 2d image with gaussian kernel
-<<<<<<< HEAD
 def convolve_gauss(data , cfg, sigma_in, phi_in, incl, opt , PRINTALL):
 	sigma_y = convert_kpc2px(sigma_in, cfg)
 	sigma_x = sigma_y * m.cos(incl)
 	kernel2d = Gaussian2DKernel(sigma_x, y_stddev=sigma_y, theta=phi_in) #x_size= 51, y_size= 51 
 	res = ap_convole(data, kernel2d, )
-=======
-def convolve_gauss( data , cfg, sigma_in, opt , PRINTALL):
-	sigma = convert_kpc2px(sigma_in, cfg)
-	if(PRINTALL == True):
-		print('current sigma:','%0.3f' %  convert_px2kpc(sigma,cfg) , 'in kpc',  '%0.3f' % sigma, 'in px')
-	#Convolution is identical with gaussian_filter, needs standard-deviation in pixels!
-	res = ndimage.filters.gaussian_filter(data, sigma)
->>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
 	if( PRINTALL == True ):
 		#Now plot the map (compare to fits file if something doesnt work)
 		plt.imshow(res, cmap='gray')
@@ -110,7 +101,7 @@ def convert_kpc2px(kpc, cfg):
 	kpc_per_arcsec = cfg.getfloat('distance') * m.tan( 2 * m.pi / (360.* 3600.) ) / 1000.
 	return float(kpc * cfg.getfloat('pixel_per_arcsec') / kpc_per_arcsec )
 
-### Calculate the error for each value based on background noise and a calibration error that depends on the magnitude of the value
+
 def calc_error(val, noise, calibration):
 	error = m.sqrt( m.pow(noise,2.) + m.pow(val*calibration,2.) )
 	return error

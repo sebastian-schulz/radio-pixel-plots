@@ -7,7 +7,10 @@ import os
 #System tools (file in and output ...)
 import sys
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
 
 if(len(sys.argv) != 2 ):
 	print('Need path to parent directory of results!')
