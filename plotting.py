@@ -115,8 +115,8 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None, x_err=None, y_err=Non
 	ax.set_yscale("log", nonposy='clip')
 
 	ax.grid(True)
-	ax.set_ylabel(r'{SFR surface density based on Radio data}')
-	ax.set_xlabel(r'{SFR surface density based on GALEX/Spitzer}')
+	ax.set_ylabel(r'{$\left(\Sigma_{SFR}\right) _{RC}$ in M$_{Sun}$ yr$^{-1}$ kpc$^{-2}$}')
+	ax.set_xlabel(r'{$\left(\Sigma_{SFR}\right) _{hyb}$ in M$_{Sun}$ yr$^{-1}$ kpc$^{-2}$}')
 	#plt.xlim(1e-4,1e-1)
 	#plt.ylim(1e-4,1e-1)
 	#Save plots as pdf
@@ -128,9 +128,9 @@ def plot(val_x, val_y, alpha, a, b, cfg, case, sigma=None, x_err=None, y_err=Non
 		outfile = tmp[0]+'_'+tmp[1]+'_'+ cfg.get('names',case) +'_pixel_conv.pdf'
 	
 	if(case == 'conv_low'):
-		title = cfg.get('names','galaxy') + r' with Gaussian kernel, $l = $'+'%0.2f' % sigma + r' kpc , @' + cfg.get('values','freq_low') + r' MHz'
+		title = cfg.get('names','galaxy') + r' with Gaussian kernel, $l_{CRE} = $'+'%0.2f' % sigma + r' kpc , @' + cfg.get('values','freq_low') + r' MHz'
 	elif(case == 'conv_high'):
-		title = cfg.get('names','galaxy') + r' with Gaussian kernel, $l = $'+'%0.2f' % sigma + r' kpc, @' + cfg.get('values','freq_high') + r' MHz'
+		title = cfg.get('names','galaxy') + r' with Gaussian kernel, $l_{CRE} = $'+'%0.2f' % sigma + r' kpc, @' + cfg.get('values','freq_high') + r' MHz'
 	elif(case == 'low'):
 		title = cfg.get('names','galaxy') + r', @' + cfg.get('values','freq_low') + r' MHz'
 	elif(case == 'high'):

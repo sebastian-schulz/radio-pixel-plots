@@ -26,7 +26,7 @@ PRINTALL = True
 #The fitting function supported other fitting methods earlier, this is no longer the case! (too much work maintaining the different fitting methods). DO NOT CHANGE
 FIT_METHOD = 'odr' #lsq / odr
 
-#rel. calibration error for both radio and sfr maps
+#rel. calibration error for both radio and sfr maps, we assume 5%
 CALIB_ERR = 0.05
 
 #################
@@ -158,7 +158,7 @@ sigma = {'low' : sigma_low, 'high' : sigma_high, 'sfr' : sigma_sfr }
 #3 sigma cutoff for all datasets
 # for each dataset, there is a corresponding set containing the errors
 # name is always the same with _err attached
-#ADD ERRORS WITH 5% OF THE PIXEL VALUE!!! m.sqrt( sigma**2 + (value*0.05)**2 )
+#calc_err adds errors with calibration error (5%) of pixel value to the sigma error: m.sqrt( sigma**2 + (value*0.05)**2 )
 for i in range(len(pixels_l)):
 	if(pixels_l[i] > 3. * sigma_low ):
 		if(pixels_h[i] > 3. * sigma_high): 
