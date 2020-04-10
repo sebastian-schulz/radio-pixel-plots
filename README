@@ -5,20 +5,15 @@ The script then uses the two radio maps to calculate the spectral index 'alpha' 
 
 In a second step uses a gaussian filter to smear out the sfr map. This models  simple diffusion of the electrons in the galaxy. The width of the filter 'sigma' is fitted to reach best possible agreement with the condon relation. The sigma is directly proportional to the diffusion length.
 
-<<<<<<< HEAD
-This is an experimental version of the code. It uses an elliptical gaussian filter (2D gauss filter with sigma_x != sigma_y) to try to correct the errors introduced by (high) inclination.
-
 HOW IT WORKS
-The main program is called 'rpp-pixelplots.py'. It needs the radio maps to be in the same directory. You also need to update the config file to your paths and fill in data of the galaxy you want to analyze. A default file for NGC XXXX is provided in the radio-pixel-plots folder (called nXXXX.ini).
+The main program is called 'rpp-main.py'. To run  it you need 3 maps, 2 radio maps and one sfr-map. Those should be all in one directory and have to follow a specific naming pattern.
+Additionally you need to update the ini file to fit your galaxy, including name, distance, path to the maps etc.
+A working example of NGC 5194 is provided along with the code. The ini file is 'n5194_l_18cm.ini' and the maps are in the folder 'ngc5194'.
 
-=======
-HOW IT WORKS
-The main program is called 'rpp-pixelplots.py'. It needs the radio maps to be in the same directory. You also need to update the config file to your paths and fill in data of the galaxy you want to analyze. A default file for NGC XXXX is provided in the radio-pixel-plots folder (called nXXXX.ini).
+Usage is $: python3 rpp-main.py <path to config file> <boolean incl correction>
+where the path can be absolute or relative and the boolean is 0 for no correction and 1 for inclination correction.
 
->>>>>>> 39e6c05434ac1f792f6c59921ecae3e02b27653c
-usage then is $: python3 pixelplots.py <path to config file>
-
-rpp-compare.py is a standalone script that will write all the resulting data (if you ran pixelplots.py for many different galaxies) into one tab separated file for further analysis. 
+rpp-compare.py is a standalone script that will write all the resulting data (if you ran rpp for many different galaxies) into one tab separated file for further analysis.
 
 FURTHER READING
 A more in depth documentation will be provided in the future. Also check the code for documentation on how exactly it works.
@@ -26,6 +21,7 @@ A more in depth documentation will be provided in the future. Also check the cod
 ADDITIONAL REQUIREMENTS
 must run with python3, python2 not supported by all the packages used
 This programm requires SAOs DS9 version 8 or later to run. Available at: http://ds9.si.edu/site/Beta.html
+Also uses pdfunite command from poppler-utils, using the standard linux pdf library
 List of python packages used:
 	numpy
 	math
