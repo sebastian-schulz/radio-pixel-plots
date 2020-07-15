@@ -92,14 +92,14 @@ def calculate_rms(data, x_center, y_center, x_size, y_size):
     # calculate borders of the rms box in pixel, makes use of int cutting
     # therefor the box may be 1 pixel length off in any direction
     # but that only has a small impact
-    y_min = x_center - y_size / 2.
-    y_max = x_center + x_size / 2.
-    x_min = y_center - y_size / 2.
-    x_max = y_center + y_size / 2.
+    y_min = y_center - y_size / 2.
+    y_max = y_center + y_size / 2.
+    x_min = x_center - x_size / 2.
+    x_max = x_center + x_size / 2.
     n = int(x_size * y_size)
     for i in range(int(x_min), int(x_max)):
         for j in range(int(y_min), int(y_max)):
-            rms += m.pow(data[i][j], 2)
+            rms += m.pow(data[j][i], 2) #IMPORTANT: MUST BE data[Y][X]
     rms = m.sqrt(rms / n)
     # print('ROOT MEAN SQUARE OF BOX: ', rms)
     return rms

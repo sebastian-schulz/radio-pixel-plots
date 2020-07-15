@@ -14,11 +14,12 @@ CALIB_ERR = 0.05
 
 
 class Convolution:
-    def __init__(self, pp ):
+    def __init__(self, pp):
         self.pp = pp
         self.incl_corr_on = pp.incl_corr_on
-        self.phi = m.radians(pp.config.getfloat('values', 'phi'))
-        self.incl = m.radians(pp.config.getfloat('values', 'incl'))
+        if self.pp.incl_corr_on:
+            self.phi = m.radians(pp.config.getfloat('values', 'phi'))
+            self.incl = m.radians(pp.config.getfloat('values', 'incl'))
         self.sigma_conv = pp.config.getfloat('values', 'sigma_conv')
         self.px_per_as = pp.config.getfloat('values', 'pixel_per_arcsec')
         self.distance = pp.config.getfloat('values', 'distance')

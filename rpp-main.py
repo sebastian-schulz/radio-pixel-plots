@@ -31,7 +31,7 @@ if len(sys.argv) == 3:
         print('Unrecognized command line option ', sys.argv[2])
         sys.exit(-1)
 else:
-    print('Needs exactly two arguemnts: path to ini file and boolean for inclination correction. Quitting...')
+    print('Needs exactly two arguments: path to ini file and boolean for inclination correction. Quitting...')
     sys.exit(-1)
 
 # Read in all the settings and data from the three fits files
@@ -44,6 +44,8 @@ create_conv = Convolution(create_pp)
 create_conv.run()
 
 create_plots = Plotting(create_pp, create_conv)
+
+create_plots.png_all()
 
 create_plots.print_all()
 

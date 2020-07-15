@@ -1,12 +1,14 @@
 # Library for python plotting
+import configparser
+
 import matplotlib.pyplot as plt
 # Mighty numerical library of ptyhon
 import numpy as np
-import configparser
-
-from calc_functions import fct_f, fct_result
-#For LateX fonts and symbols in plots
+# For LateX fonts and symbols in plots
 from matplotlib import rc
+import os
+from calc_functions import fct_f, fct_result
+
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
 rc('font',**{'family':'serif','serif':['T1']})# T1 is the LaTex standard font, also used by scr familiy documents as default
@@ -17,6 +19,12 @@ class Plotting:
     def __init__(self, pp, conv):
         self.pp = pp
         self.conv = conv
+
+    def png_all(self):
+        self.__map_plt(self.pp.data_high, 'high')
+        self.__map_plt(self.pp.data_low, 'low')
+        self.__map_plt(self.pp.data_sfr, 'sfr')
+        self.__ds9_map(self.pp)
 
     def print_all(self):
         self.__print_data(self.pp)
@@ -65,6 +73,35 @@ class Plotting:
                      x_err=self.conv.pixel_sfr_conv_cut_high[1],
                      y_err=self.conv.pixel_high_conv_cut_high[3])
 
+    ### TEST
+    def __map_plt(self, data, case):
+        values, edges = np.histogram(data, bins=1000000, range=(0, data.max()))
+        cmax = 0
+        total = 0
+        i = 0
+        for l in range(len(values)):
+            total += values[l]
+        while True:
+            cmax +=values[i]
+            if cmax > total * .99:
+                break
+            i += 1
+        #tmp = np.zeros(shape=(data.shape))
+        #for i in range(len(data)):
+        #    for j in range(len(data)):
+        #        tmp[i, j] = m.sqrt(m.fabs(data[i, j]))
+            # Plot the modified data as a greyscale map (compare with original)
+        plt.imshow(data, cmap='gray', clim=(0, edges[i]))  # clim=(edges[9]) )
+        plt.colorbar()
+        plt.ylim(0, len(data) - 1)
+#        image_name = cfg.get('names', galaxyname)
+#        image_name = image_name.rstrip('.fits')
+        tmp = self.pp.config.get('names', 'galaxy').split(' ')
+        image_name = 'n' + tmp[1] + '_'  + case + '_099_map.png'
+        # And save the plot to file:
+        plt.savefig(image_name, dpi=500)
+        plt.clf()  # clears the plot for further plotting
+
     # Prints data arrays to file as tab separated values
     def __print_data(self, pp):
         # mean = 0.
@@ -97,7 +134,7 @@ class Plotting:
     def __print_conv_data_high(self, pp, conv):
         # mean = 0.
         tmp = pp.config.get('names', 'galaxy').split(' ')
-        dataname = tmp[0] + '_' + tmp[1] + 'high' + '_pixel_conv.dat'
+        dataname = tmp[0] + '_' + tmp[1] + '_' +'high' + '_pixel_conv.dat'
         f_tmp = open(dataname, 'w')
         print(dataname)
         f_tmp.write('#radio SFR \t error \t conv hybrid SFR \t error \t spectral index \n')
@@ -118,7 +155,7 @@ class Plotting:
     def __print_conv_data_low(self, pp, conv):
         # mean = 0.
         tmp = pp.config.get('names', 'galaxy').split(' ')
-        dataname = tmp[0] + '_' + tmp[1] + 'low' + '_pixel_conv.dat'
+        dataname = tmp[0] + '_' + tmp[1] + '_' + 'low' + '_pixel_conv.dat'
         f_tmp = open(dataname, 'w')
         print(dataname)
         f_tmp.write('#radio SFR \t error \t conv hybrid SFR \t error \t spectral index \n')
@@ -284,4 +321,27 @@ class Plotting:
         with open(results_ini, 'w') as configfile:
             res_out.write(configfile)
 
-
+    def __ds9_map(self, pp):
+        for fname in (['low', 'high', 'sfr']):
+            oname = pp.config.get('names', fname).rstrip('.fits') + '_ds9box.png'
+            cmd = ('ds9 ' + pp.config.get('names', fname) +
+                          ' -regions system image ' +
+                          ' -regions command "box ' +
+                          pp.config.get(fname + '_cutoff_box', 'center_x') + ' ' +
+                          pp.config.get(fname + '_cutoff_box', 'center_y') + ' ' +
+                          pp.config.get(fname + '_cutoff_box', 'size_x') + ' ' +
+                          pp.config.get(fname + '_cutoff_box', 'size_y') +
+                          ' # color=red" ' +
+                          '-regions command "box ' +
+                          pp.config.get('values', 'center_x') + ' ' +
+                          pp.config.get('values', 'center_y') + ' ' +
+                          str(pp.px_per_box * pp.config.getint('values', 'n_boxes')) + ' ' +
+                          str(pp.px_per_box * pp.config.getint('values', 'n_boxes')) +
+                          ' # color=yellow" ' +
+                          ' -zoom to fit -scale mode 90  -saveimage png ' +
+                          oname + ' -quit')
+            os.system(cmd)
+            print(cmd.rstrip(' -quit'))
+        # Save the DS9 command as string to print to results file later
+#        for key in cmd:
+#           cmd[key] = cmd[key].rstrip('-quit')
