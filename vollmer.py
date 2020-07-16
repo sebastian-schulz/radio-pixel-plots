@@ -27,7 +27,7 @@ class Vollmer:
         phi = []
         l = []
         for i in np.arange(0.3, 3.5, 0.1):
-            adaptive_conv = AdaptiveConvolution(self.sfr_map, k=21, exp=n, l_0=i, sigma_0=1e-3, method=kernel_type)
+            adaptive_conv = AdaptiveConvolution(self.sfr_map, k=21, exp=n, l_0=i, sigma_0=8e-3, method=kernel_type)
             adaptive_conv.convolve()
             sfr_conv = adaptive_conv.conv_map
             l.append(i)
