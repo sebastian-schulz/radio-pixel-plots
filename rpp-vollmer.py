@@ -1,7 +1,7 @@
 import sys
-
 from vollmer import Vollmer
 from pixelplots import Pixelplots
+
 
 # Read in config file from command line argument, exit if it cant be found
 if len(sys.argv) == 3:
@@ -21,4 +21,4 @@ create_pp = Pixelplots(conf_file_name, False)
 create_pp.run()
 
 compare_vollmer = Vollmer(create_pp, case)
-compare_vollmer.run(kernel_type='round_exp', n=0) #round_exp, round_gauss, ell_gauss, ...
+compare_vollmer.run(kernel_type='round_exp', n=0)  # round_exp, round_gauss, ell_gauss, ...

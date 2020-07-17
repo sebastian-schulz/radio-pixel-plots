@@ -1,20 +1,21 @@
 import numpy as np
 import math as m
 
+
 class AdaptiveConvolution:
     def __init__(self, map, k, exp, l_0, sigma_0, method='round_gauss'):
-        #k is kernel size, must be odd, n is exponent of the adaptive factor
+        # k is kernel size, must be odd, n is exponent of the adaptive factor
         self.kernel_function = self.__make_kernel_function(method, l_0, sigma_0, exp)
         self.map = map
         self.k = k
         self.n = map.shape[0]
         self.m = int(self.n+k-1)
-        #print(self.n, self.k, self.m)
-        self.padded_map = np.zeros((self.m,self.m))
+        # print(self.n, self.k, self.m)
+        self.padded_map = np.zeros((self.m, self.m))
         for i in range(self.m):
             for j in range(self.m):
                 if (self.k - 1)/2 - 1 < i < self.n + (self.k - 1)/2 and \
-                        (self.k - 1) / 2 - 1  < j < self.n + (self.k - 1) / 2:
+                        (self.k - 1) / 2 - 1 < j < self.n + (self.k - 1) / 2:
                     self.padded_map[j][i] = map[int(j-(self.k-1)/2)][int(i-(self.k-1)/2)]
         self.conv_map = np.zeros((self.n, self.n))
 
@@ -56,17 +57,16 @@ class AdaptiveConvolution:
         self.kernel /= tmp
 
 
-#map = np.ones((10,10))
-#print(map)
-#conv = AdaptiveConvolution('round_gauss', map, 7, 0, 2, 1e-3 )
-#conv.make_kernel(1)
-#tmp = 0
-#for i in range(conv.kernel.shape[0]):
+# map = np.ones((10,10))
+# print(map)
+# conv = AdaptiveConvolution('round_gauss', map, 7, 0, 2, 1e-3 )
+# conv.make_kernel(1)
+# tmp = 0
+# for i in range(conv.kernel.shape[0]):
 #    for j in range(conv.kernel.shape[0]):
 #        tmp += conv.kernel[j][i]
-#print(tmp)
-#conv.convolve()
-
-#np.set_printoptions(precision=3)
-#print(conv.padded_map)
-#print(conv.conv_map)
+# print(tmp)
+# conv.convolve()
+# np.set_printoptions(precision=3)
+# print(conv.padded_map)
+# print(conv.conv_map)

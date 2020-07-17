@@ -3,7 +3,7 @@
 import sys
 import os
 
-# Supressing runtime warning (mainly for maximum iterations of optimize)
+# Suppressing runtime warning (mainly for maximum iterations of optimize)
 import warnings
 
 from pixelplots import Pixelplots
@@ -51,9 +51,9 @@ create_plots.print_all()
 
 create_plots.plot_all()
 
-tmp = create_pp.config.get('names','galaxy').split(' ')
+tmp = create_pp.config.get('names', 'galaxy').split(' ')
 tmp2 = tmp[0]+'_'+tmp[1]+'_plots_combined.pdf'
 
 os.system('rm *plots_combined.pdf')
-os.system('pdfunite *pdf '+ tmp2 )
+os.system('pdfunite *pdf ' + tmp2)
 print("Finished!")

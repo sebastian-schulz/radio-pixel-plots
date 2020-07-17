@@ -1,15 +1,15 @@
-from pixelplots import Pixelplots
 import math as m
 import numpy as np
 import matplotlib.pyplot as plt
+from adaptive_convolution import AdaptiveConvolution
 
 from matplotlib import rc
-#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-## for Palatino and other serif fonts use:
-rc('font',**{'family':'serif','serif':['T1']})# T1 is the LaTex standard font, also used by scr familiy documents as default
+# rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+# for Palatino and other serif fonts use:
+rc('font', **{'family': 'serif', 'serif': ['T1']})
+# T1 is the LaTex standard font, also used by scr familiy documents as default
 rc('text', usetex=True)
 
-from adaptive_convolution import AdaptiveConvolution
 
 class Vollmer:
     def __init__(self, pp, case='low'):
@@ -32,7 +32,7 @@ class Vollmer:
             sfr_conv = adaptive_conv.conv_map
             l.append(i)
             phi.append(self.__calc_phi(self.radio_map, sfr_conv))
-        #for i in range(len(l)):
+        # for i in range(len(l)):
         #    print(l[i], '\t', m.log10(phi[i][0]))
         log_phi = []
         for i in range(len(phi)):
@@ -44,20 +44,18 @@ class Vollmer:
         plt.clf()  # clean for further plotting
 
     def __calc_phi(self, radio_map, sfr_map_conv):
-        Q = 0
+        q = 0
         tmp = 0
         phi = 0
         for i in range(len(sfr_map_conv)):
             for j in range(len(sfr_map_conv[0])):
-                Q += m.pow(sfr_map_conv[i][j],2)
+                q += m.pow(sfr_map_conv[i][j], 2)
                 tmp += radio_map[i][j] * sfr_map_conv[i][j]
-        Q = Q / tmp
+        q = q / tmp
         tmp = 0
         for i in range(len(radio_map)):
             for j in range(len(radio_map[0])):
-                phi += m.pow(radio_map[i][j] - sfr_map_conv[i][j] / Q, 2)
+                phi += m.pow(radio_map[i][j] - sfr_map_conv[i][j] / q, 2)
                 tmp += m.pow(radio_map[i][j], 2)
         phi = phi/tmp
         return phi
-
-
