@@ -52,7 +52,7 @@ class Convolution:
     def __fct_gauss(self, sigma, pp, is_high):
         # Function that calculates the fit parameter a (slope) as a function of gaussian kernel width sigma
         # Convolve with gaussian:
-        data_sfr_conv = self.__convolve_gauss(sigma)
+        self.data_sfr_conv = self.__convolve_gauss(sigma)
         # Compute new spectral indices (may have changed due to different cutting)
         alpha_conv = []
         for i in range(len(pp.pixel_low)):
@@ -60,7 +60,7 @@ class Convolution:
                               m.log10(pp.config.getfloat('values', 'freq_low') /
                                       pp.config.getfloat('values', 'freq_high')))
 
-        pixel_sfr_2d_conv = convert_resolution_adv(data_sfr_conv,
+        pixel_sfr_2d_conv = convert_resolution_adv(self.data_sfr_conv,
                                                    pp.config.getfloat('values', 'center_x'),
                                                    pp.config.getfloat('values', 'center_y'),
                                                    pp.config.getfloat('values', 'n_boxes'),
@@ -85,7 +85,8 @@ class Convolution:
                             pixel_low_conv_cut[1].append(calc_rms_error(pp.pixel_low[i], pp.sigma['low'], CALIB_ERR))
                             pixel_high_conv_cut[0].append(pp.pixel_high[i])
                             pixel_high_conv_cut[1].append(calc_rms_error(pp.pixel_high[i], pp.sigma['high'], CALIB_ERR))
-
+        print('Number of points in sample after cutting:', len(alpha_conv_cut))
+        self.no_cut_points = len(alpha_conv_cut)
         # Now apply the condon relation to the radio map set via parameter 'opt' and return values
         pixel_high_conv_cut[2] = condon(pixel_high_conv_cut[0], pp.config.getfloat('values', 'FWHM'),
                                              pp.config.getfloat('values', 'freq_high'))
@@ -126,6 +127,6 @@ class Convolution:
             quit()
         sigma_y = convert_kpc2px(sigma_in, self.distance, self.px_per_as)
         sigma_x = sigma_y * m.cos(incl)
-        kernel2d = Gaussian2DKernel(sigma_x, y_stddev=sigma_y, theta=phi)  # x_size= 51, y_size= 51
+        kernel2d = Gaussian2DKernel(sigma_x, y_stddev=sigma_y, theta=phi)
         res = ap_convole(self.pp.data_sfr, kernel2d, )
         return res

@@ -1,6 +1,5 @@
 # Library for python plotting
 import configparser
-
 import matplotlib.pyplot as plt
 # Mighty numerical library of ptyhon
 import numpy as np
@@ -21,10 +20,18 @@ class Plotting:
         self.conv = conv
 
     def png_all(self):
-        self.__map_plt(self.pp.data_high, 'high')
-        self.__map_plt(self.pp.data_low, 'low')
-        self.__map_plt(self.pp.data_sfr, 'sfr')
+        self.map_plt(self.pp.data_high, 'high')
+        self.map_plt(self.pp.data_low, 'low')
+        self.map_plt(self.pp.data_sfr, 'sfr')
         self.__ds9_map(self.pp)
+        self.col_map_plt(self.pp.data_sfr, 'sfr_log_colormap.png')
+        self.col_map_plt(self.conv.data_sfr_conv, 'sfr_convolved_log_colormap.png')
+        self.col_map_plt(self.pp.data_low, 'low_convolved_log_colormap.png')
+        residual_start = self.pp.data_low - self.pp.data_sfr
+        residual_finish = self.pp.data_low - self.conv.data_sfr_conv
+        self.col_res_plt(residual_start, 'residual_initial_log_colormap.png')
+        self.col_res_plt(residual_finish, 'residual_final_log_colormap.png')
+        self.__sfr_1200pc_plt(self.pp.pixel_sfr_2d, 'sfr')
 
     def print_all(self):
         self.__print_data(self.pp)
@@ -73,8 +80,8 @@ class Plotting:
                      x_err=self.conv.pixel_sfr_conv_cut_high[1],
                      y_err=self.conv.pixel_high_conv_cut_high[3])
 
-    ### TEST
-    def __map_plt(self, data, case):
+    # TEST
+    def map_plt(self, data, case):
         values, edges = np.histogram(data, bins=1000000, range=(0, data.max()))
         cmax = 0
         total = 0
@@ -97,10 +104,35 @@ class Plotting:
 #        image_name = cfg.get('names', galaxyname)
 #        image_name = image_name.rstrip('.fits')
         tmp = self.pp.config.get('names', 'galaxy').split(' ')
-        image_name = 'n' + tmp[1] + '_'  + case + '_099_map.png'
+        image_name = 'n' + tmp[1] + '_' + case + '_099_map.png'
         # And save the plot to file:
         plt.savefig(image_name, dpi=500)
         plt.clf()  # clears the plot for further plotting
+
+
+    def col_res_plt(self, data, fname):
+        fig, ax = plt.subplots(1, 1)
+        pcm = ax.pcolormesh(data, cmap='RdBu_r', vmax=np.max(data), vmin=0)
+        fig.colorbar(pcm, ax=ax, extend='both')
+        plt.savefig(fname, dpi=500)
+        plt.clf()
+
+    def col_map_plt(self, data, fname):
+        fig, ax = plt.subplots(1, 1)
+        pcm = ax.pcolormesh(data, cmap='RdBu_r', vmax=np.max(data) ,vmin=0)
+        fig.colorbar(pcm, ax=ax, extend='both')
+        plt.savefig(fname, dpi=500)
+        plt.clf()
+
+    def __sfr_1200pc_plt(self, data, case):
+           plt.imshow(data, cmap='gray')  # clim=(edges[9]) )
+           plt.colorbar()
+           plt.ylim(0, len(data) - 1)
+           tmp = self.pp.config.get('names', 'galaxy').split(' ')
+           image_name = 'n' + tmp[1] + '_' + case + '_1200pc_map.png'
+           # And save the plot to file:
+           plt.savefig(image_name, dpi=500)
+           plt.clf()  # clears the plot for further plotting
 
     # Prints data arrays to file as tab separated values
     def __print_data(self, pp):
@@ -108,7 +140,7 @@ class Plotting:
         tmp = pp.config.get('names', 'galaxy').split(' ')
         dataname = tmp[0] + '_' + tmp[1] + '_pixel.dat'
         f_tmp = open(dataname, 'w')
-        print(dataname)
+        #print(dataname)
         f_tmp.write(
             '#low freq. radio \t error \t high freq. radio \t error \t hybrid SFR \t error \t spectral index \n')
         for i in range(len(pp.alpha_cut)):
@@ -136,7 +168,7 @@ class Plotting:
         tmp = pp.config.get('names', 'galaxy').split(' ')
         dataname = tmp[0] + '_' + tmp[1] + '_' +'high' + '_pixel_conv.dat'
         f_tmp = open(dataname, 'w')
-        print(dataname)
+        #print(dataname)
         f_tmp.write('#radio SFR \t error \t conv hybrid SFR \t error \t spectral index \n')
         for i in range(len(conv.alpha_conv_cut_high)):
             f_tmp.write(str(conv.pixel_high_conv_cut_high[0][i]))
@@ -157,7 +189,7 @@ class Plotting:
         tmp = pp.config.get('names', 'galaxy').split(' ')
         dataname = tmp[0] + '_' + tmp[1] + '_' + 'low' + '_pixel_conv.dat'
         f_tmp = open(dataname, 'w')
-        print(dataname)
+        #print(dataname)
         f_tmp.write('#radio SFR \t error \t conv hybrid SFR \t error \t spectral index \n')
         for i in range(len(conv.alpha_conv_cut_low)):
             f_tmp.write(str(conv.pixel_low_conv_cut_low[0][i]))
@@ -286,9 +318,9 @@ class Plotting:
         res_out = configparser.ConfigParser()
 
         res_out['name'] = {'fname': pp.config.get('names', 'galaxy')}
-                           # 'ds9cmd_low': cmd['low'],
-                           # 'ds9cmd_high': cmd['high'],
-                           # 'ds9cmd_sfr': cmd['sfr']}
+#                            'ds9cmd_low': cmd['low'],
+#                           'ds9cmd_high': cmd['high'],
+#                            'ds9cmd_sfr': cmd['sfr']}
 
         res_out['Low_freq_fit'] = {'#Fit results for pixel plots, with std errors\n'
                                    'a': str(pp.fit_low_a[0]),
@@ -318,6 +350,11 @@ class Plotting:
                                   'freq_low': pp.config.get('values', 'freq_low'),
                                   'freq_high': pp.config.get('values', 'freq_high')}
 
+        res_out['number_of_points'] = {'#Error clipping comparison\n'
+                                  'pixelplot': pp.no_points_cut,
+                                  'convolution': conv.no_cut_points}
+
+
         with open(results_ini, 'w') as configfile:
             res_out.write(configfile)
 
@@ -341,7 +378,7 @@ class Plotting:
                           ' -zoom to fit -scale mode 90  -saveimage png ' +
                           oname + ' -quit')
             os.system(cmd)
-            print(cmd.rstrip(' -quit'))
+            #print(cmd.rstrip(' -quit'))
         # Save the DS9 command as string to print to results file later
 #        for key in cmd:
 #           cmd[key] = cmd[key].rstrip('-quit')

@@ -1,5 +1,4 @@
 # Mighty numerical library of ptyhon
-
 import numpy as np
 # Pythons math package with all the constants and functions
 import math as m

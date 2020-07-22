@@ -130,8 +130,8 @@ class Pixelplots:
 
         # Some diagnostic output of how many points were cut
         print('Number of points in sample:', len(self.pixel_low))
-        print('Number of points after 3 sigma cutoff:', len(self.pixel_low_cut[0]))
-
+        print('Number of points after 3 sigma cutoff:', len(self.alpha_fit))
+        self.no_points_cut = len(self.alpha_fit)
         mean_old = 0
         tmp = [item for sublist in self.data_low for item in sublist]
         for i in range(len(tmp)):
