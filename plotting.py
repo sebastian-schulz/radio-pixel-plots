@@ -24,13 +24,13 @@ class Plotting:
         self.map_plt(self.pp.data_low, 'low')
         self.map_plt(self.pp.data_sfr, 'sfr')
         self.__ds9_map(self.pp)
-        self.col_map_plt(self.pp.data_sfr, 'sfr_log_colormap.png')
-        self.col_map_plt(self.conv.data_sfr_conv, 'sfr_convolved_log_colormap.png')
-        self.col_map_plt(self.pp.data_low, 'low_convolved_log_colormap.png')
+        self.col_map_plt(self.pp.data_sfr, 'sfr_colormap.png')
+        self.col_map_plt(self.conv.data_sfr_conv, 'sfr_convolved_colormap.png')
+        self.col_map_plt(self.pp.data_low, 'low_convolved_colormap.png')
         residual_start = self.pp.data_low - self.pp.data_sfr
         residual_finish = self.pp.data_low - self.conv.data_sfr_conv
-        self.col_res_plt(residual_start, 'residual_initial_log_colormap.png')
-        self.col_res_plt(residual_finish, 'residual_final_log_colormap.png')
+        self.col_res_plt(residual_start, 'residual_initial_colormap.png')
+        self.col_res_plt(residual_finish, 'residual_final_colormap.png')
         self.__sfr_1200pc_plt(self.pp.pixel_sfr_2d, 'sfr')
 
     def print_all(self):
@@ -66,7 +66,7 @@ class Plotting:
                      self.conv.fit_low_conv_a[0],
                      self.conv.fit_low_conv_b[0],
                     'conv_low',
-                     sigma= self.conv.optimal_sigma_low[0],
+                     sigma= self.conv.optimal_l_low[0],
                      x_err=self.conv.pixel_sfr_conv_cut_low[1],
                      y_err=self.conv.pixel_low_conv_cut_low[3])
         self.__pplot(self.pp,
@@ -76,7 +76,7 @@ class Plotting:
                      self.conv.fit_high_conv_a[0],
                      self.conv.fit_high_conv_b[0],
                     'conv_high',
-                     sigma=self.conv.optimal_sigma_high[0],
+                     sigma=self.conv.optimal_l_high[0],
                      x_err=self.conv.pixel_sfr_conv_cut_high[1],
                      y_err=self.conv.pixel_high_conv_cut_high[3])
 
@@ -336,9 +336,9 @@ class Plotting:
                                    'chi_sqr': str(pp.fit_high_chi)}
 
         res_out['Conv_results'] = {'#Diffusion length from gaussian kernel in kpc \n'
-                                   'sigma_l': str(conv.optimal_sigma_low[0]),
+                                   'sigma_l': str(conv.optimal_l_low[0]),
                                    'a_err_l': str(conv.fit_low_conv_a[1]),
-                                   'sigma_h': str(conv.optimal_sigma_high[0]),
+                                   'sigma_h': str(conv.optimal_l_high[0]),
                                    'a_err_h': str(conv.fit_high_conv_a[1])}
 
         res_out['rms_sigma'] = {'#The RMS values from calculated from the rms boxes\n'

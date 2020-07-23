@@ -3,6 +3,7 @@ import math as m
 # Astropy library that builds 2d gauss kernels that are rotated by some agnle theta wrt the coordinate axis
 from astropy.convolution import Gaussian2DKernel
 from astropy.convolution import convolve_fft as ap_convole
+from astropy.io import fits
 # Library includes a zero-finder method (to find the best value for the kernel), also includes methods fit data/curves
 from scipy import optimize
 from calc_functions import fit_odr, calc_rms_error, convert_kpc2px, condon, convert_resolution_adv
@@ -26,23 +27,35 @@ class Convolution:
 
     def run(self):
         self.__fit_sigma()
+        self.data_sfr_conv_low = self.__convolve_gauss(self.sigma_low)
+        self.data_sfr_conv_high = self.__convolve_gauss(self.sigma_high)
+        hdul = fits.open(self.pp.config.get('names', 'sfr'))
+        hdul[0].data = self.__convolve_gauss(self.sigma_low)
+        tmp_str = self.pp.config.get('names', 'sfr').rstrip('.fits') + '_conv_high.fits'
+        hdul.writeto(tmp_str, overwrite=True)
+        hdul[0].data = self.__convolve_gauss(self.sigma_high)
+        tmp_str = self.pp.config.get('names', 'sfr').rstrip('.fits') + '_conv_low.fits'
+        hdul.writeto(tmp_str, overwrite=True)
+
 
     def __fit_sigma(self):
         print('Finding optimal gaussian kernel. This may take a moment...')
-        self.optimal_sigma_low = optimize.fsolve(self.__fct_gauss_fit,  # fitting function
-                                                self.sigma_conv,  # starting value
-                                                args=(self.pp, False),  # additional arguments
-                                                maxfev=15)  # max. no. of iterations
+        self.optimal_l_low = optimize.fsolve(self.__fct_gauss_fit,  # fitting function
+                                             self.sigma_conv,  # starting value
+                                             args=(self.pp, False),  # additional arguments
+                                             maxfev=15)  # max. no. of iterations
+        self.sigma_low = self.optimal_l_low[0]
         # Diffusion length is the FWHM/2 of the final image, FWHM are square added first
-        self.optimal_sigma_low[0] = m.sqrt(m.pow(2.3548 * self.optimal_sigma_low[0], 2) + m.pow(1.2, 2)) / 2.
-        print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_sigma_low[0], 'kpc')
+        self.optimal_l_low[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_low[0], 2) + m.pow(1.2, 2)) / 2.
+        print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_l_low[0], 'kpc')
 
-        self.optimal_sigma_high = optimize.fsolve(self.__fct_gauss_fit,
-                                                self.sigma_conv,
-                                                args=(self.pp, True),
-                                                maxfev=15)
-        self.optimal_sigma_high[0] = m.sqrt(m.pow(2.3548 * self.optimal_sigma_high[0], 2) + m.pow(1.2, 2)) / 2.
-        print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_sigma_high[0], 'kpc')
+        self.optimal_l_high = optimize.fsolve(self.__fct_gauss_fit,
+                                              self.sigma_conv,
+                                              args=(self.pp, True),
+                                              maxfev=15)
+        self.sigma_high = self.optimal_l_high[0]
+        self.optimal_l_high[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_high[0], 2) + m.pow(1.2, 2)) / 2.
+        print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_l_high[0], 'kpc')
 
     def __fct_gauss_fit(self, sigma, pp, is_high):
         # Gaussian Kernel function for optimization purposes, because optimize searches for zeros by default
