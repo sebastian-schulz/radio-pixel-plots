@@ -19,22 +19,29 @@ class AdaptiveConvolution:
                     self.padded_map[j][i] = map[int(j-(self.k-1)/2)][int(i-(self.k-1)/2)]
         self.conv_map = np.zeros((self.n, self.n))
 
-    def __make_kernel_function(self, method, l_0, sigma_0, exp):
+    def __make_kernel_function(self, method, l_0, sigma_0, n):
         if method == 'round_gauss':
-            def _kernel_function(val, x, y):
-                l = l_0
-                return m.exp(-(x*x+y*y)/(l*l))
-            return _kernel_function
-        elif method == 'round_gauss_adaptive':
-            def _kernel_function(val, x, y):
-                l = l_0 * m.pow(val/sigma_0, exp)
-                return m.exp(-(x*x+y*y)/(l*l))
-            return _kernel_function
+            if n == 0:
+                def _kernel_function(val, x, y):
+                    l = l_0
+                    return m.exp(-(x*x+y*y)/(l*l))
+                return _kernel_function
+            else:
+                def _kernel_function(val, x, y):
+                    l = l_0 * m.pow(m.fabs(val)/sigma_0, n)
+                    return m.exp(-(x*x+y*y)/(l*l))
+                return _kernel_function
         elif method == 'round_exp':
-            def _kernel_function(val, x, y):
-                l = l_0
-                return m.exp(-m.sqrt((x*x+y*y))/l)
-            return _kernel_function
+            if n == 0:
+                def _kernel_function(val, x, y):
+                    l = l_0
+                    return m.exp(-m.sqrt((x*x+y*y))/l)
+                return _kernel_function
+            else:
+                def _kernel_function(val, x, y):
+                    l = l_0 * m.pow(m.fabs(val) / sigma_0, n)
+                    return m.exp(-m.sqrt((x*x+y*y))/l)
+                return _kernel_function
 
     def convolve(self):
         for i in range(self.n):

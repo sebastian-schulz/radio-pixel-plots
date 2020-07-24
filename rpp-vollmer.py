@@ -1,4 +1,5 @@
 import sys
+import os
 from vollmer import Vollmer
 from pixelplots import Pixelplots
 
@@ -20,5 +21,14 @@ else:
 create_pp = Pixelplots(conf_file_name, False)
 create_pp.run()
 
+if not os.path.isdir('./vollmer'):
+    os.mkdir('./vollmer')
+os.chdir('./vollmer')
+
 compare_vollmer = Vollmer(create_pp, case)
-compare_vollmer.run(kernel_type='round_exp', n=0)  # round_exp, round_gauss, ell_gauss, ...
+compare_vollmer.run(kernel_type='round_exp', n=0)  # round_exp, round_gauss, elliptical not yet implemented
+compare_vollmer.run(kernel_type='round_exp', n=0.225)
+compare_vollmer.run(kernel_type='round_exp', n=0.5)
+compare_vollmer.run(kernel_type='round_gauss', n=0)
+compare_vollmer.run(kernel_type='round_gauss', n=0.225)
+compare_vollmer.run(kernel_type='round_gauss', n=0.5)

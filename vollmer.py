@@ -2,6 +2,7 @@ import math as m
 import numpy as np
 import matplotlib.pyplot as plt
 from adaptive_convolution import AdaptiveConvolution
+import configparser
 
 from matplotlib import rc
 # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
@@ -12,18 +13,22 @@ rc('text', usetex=True)
 
 
 class Vollmer:
-    def __init__(self, pp, case='low'):
+    def __init__(self, pp, case):
         self.pp = pp
         if case == 'high':
-            self.radio_map = pp.pixel_high_2d
-            self.radio_pixels = pp.pixel_high_cut
-        else:
-            self.radio_map = pp.pixel_low_2d
-            self.radio_pixels = pp.pixel_low_cut
+            self.radio_map = self.pp.pixel_high_2d
+            self.radio_pixels = self.pp.pixel_high_cut  # Not used yet
+        else:  #DEFAULT
+            self.radio_map = self.pp.pixel_low_2d
+            self.radio_pixels = self.pp.pixel_low_cut  # Not used yet
+        self.sfr_map = self.pp.pixel_sfr_2d
+        self.case = case
+        print('Using' + self.case + 'radio data as comparison.')
+        # if not dir vollmer: mkdir vollmer
+        # cd vollmer and make output there
 
-        self.sfr_map = pp.pixel_sfr_2d
-
-    def run(self, kernel_type, n=0):
+    def run(self, kernel_type,  n=0):
+        print('Running smoothing experiment with ' + kernel_type + ' kernel and n= ', str(n))
         phi = []
         l = []
         for i in np.arange(0.3, 3.5, 0.1):
@@ -31,17 +36,35 @@ class Vollmer:
             adaptive_conv.convolve()
             sfr_conv = adaptive_conv.conv_map
             l.append(i)
+            print('l =\t', str(i))
             phi.append(self.__calc_phi(self.radio_map, sfr_conv))
-        # for i in range(len(l)):
-        #    print(l[i], '\t', m.log10(phi[i][0]))
+
         log_phi = []
         for i in range(len(phi)):
             log_phi.append(m.log10(phi[i]))
         print('Optimal kernel size is:', l[np.argmin(log_phi)])
-        fig, ax = plt.subplots()  # Create a figure containing a single axes.
-        ax.plot(l, log_phi)  # Plot some data on the axes.
-        plt.savefig(kernel_type+'_'+str(n)+'.png')
+        fig, ax = plt.subplots()  # Create a figure containing a single set of axes.
+        l1 = r'Gauss kernel with n=' + str(n)
+        ax.plot(l, log_phi, label=l1)  # Plot some data on the axes.
+        ax.grid(True)
+        ax.set_xlabel(r'Smoothing length $l$ in kpc')
+        ax.set_ylabel(r'Goodness of fit parameter $\log(\phi)$')
+        ax.legend()
+        tmp_str = self.pp.config.get('values', 'freq_' + self.case)
+        ax.set_title('Smoothing for ' + self.pp.config.get('names', 'galaxy') + ' w.r.t ' + tmp_str + ' MHz radio data')
+        plt.savefig(kernel_type+'_'+str(n)+'.png')  # .pdf 
         plt.clf()  # clean for further plotting
+
+        tmp = self.pp.config.get('names', 'galaxy').split(' ')
+        results_ini = '../' + tmp[0] + '_' + tmp[1] + '_results.ini'
+        res_out = configparser.ConfigParser()
+        res_out.read(results_ini)
+        sect = 'vollmer' + '_' + kernel_type
+        if not res_out.has_section(sect):
+            res_out.add_section(sect)
+        res_out.set(sect, self.case + '_' + str(n), str(l[np.argmin(log_phi)]))
+        with open(results_ini, 'w+') as configfile:
+            res_out.write(configfile)
 
     def __calc_phi(self, radio_map, sfr_map_conv):
         q = 0

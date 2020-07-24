@@ -25,12 +25,8 @@ class Plotting:
         self.map_plt(self.pp.data_sfr, 'sfr')
         self.__ds9_map(self.pp)
         self.col_map_plt(self.pp.data_sfr, 'sfr_colormap.png')
-        self.col_map_plt(self.conv.data_sfr_conv, 'sfr_convolved_colormap.png')
-        self.col_map_plt(self.pp.data_low, 'low_convolved_colormap.png')
-        residual_start = self.pp.data_low - self.pp.data_sfr
-        residual_finish = self.pp.data_low - self.conv.data_sfr_conv
-        self.col_res_plt(residual_start, 'residual_initial_colormap.png')
-        self.col_res_plt(residual_finish, 'residual_final_colormap.png')
+        self.col_map_plt(self.conv.data_sfr_conv_low, 'low_convolved_colormap.png')
+        self.col_map_plt(self.conv.data_sfr_conv_high, 'high_convolved_colormap.png')
         self.__sfr_1200pc_plt(self.pp.pixel_sfr_2d, 'sfr')
 
     def print_all(self):
@@ -316,46 +312,53 @@ class Plotting:
         tmp = pp.config.get('names', 'galaxy').split(' ')
         results_ini = tmp[0] + '_' + tmp[1] + '_results.ini'
         res_out = configparser.ConfigParser()
-
+        res_out.read(results_ini)
+        if not res_out.has_section('name'):
+            res_out.add_section('name')
         res_out['name'] = {'fname': pp.config.get('names', 'galaxy')}
 #                            'ds9cmd_low': cmd['low'],
 #                           'ds9cmd_high': cmd['high'],
 #                            'ds9cmd_sfr': cmd['sfr']}
-
+        if not res_out.has_section('Low_freq_fit'):
+            res_out.add_section('Low_freq_fit')
         res_out['Low_freq_fit'] = {'#Fit results for pixel plots, with std errors\n'
                                    'a': str(pp.fit_low_a[0]),
                                    'a_err': str(pp.fit_low_a[1]),
                                    'b': str(pp.fit_low_b[0]),
                                    'b_err': str(pp.fit_low_b[1]),
                                    'chi_sqr': str(pp.fit_low_chi)}
-
+        if not res_out.has_section('High_freq_fit'):
+            res_out.add_section('High_freq_fit')
         res_out['High_freq_fit'] = {'a': str(pp.fit_high_a[0]),
                                    'a_err': str(pp.fit_high_a[1]),
                                    'b': str(pp.fit_high_b[0]),
                                    'b_err': str(pp.fit_high_b[1]),
                                    'chi_sqr': str(pp.fit_high_chi)}
-
+        if not res_out.has_section('Conv_results'):
+            res_out.add_section('Conv_results')
         res_out['Conv_results'] = {'#Diffusion length from gaussian kernel in kpc \n'
                                    'sigma_l': str(conv.optimal_l_low[0]),
                                    'a_err_l': str(conv.fit_low_conv_a[1]),
                                    'sigma_h': str(conv.optimal_l_high[0]),
                                    'a_err_h': str(conv.fit_high_conv_a[1])}
-
+        if not res_out.has_section('rms_sigma'):
+            res_out.add_section('rms_sigma')
         res_out['rms_sigma'] = {'#The RMS values from calculated from the rms boxes\n'
                                 'rms_l': str(pp.sigma['low']),
                                 'rms_h': str(pp.sigma['high']),
                                 'rms_s': str(pp.sigma['sfr'])}
-
+        if not res_out.has_section('frequencies'):
+            res_out.add_section('frequencies')
         res_out['frequencies'] = {'#Frequencies for the two radio maps\n'
                                   'freq_low': pp.config.get('values', 'freq_low'),
                                   'freq_high': pp.config.get('values', 'freq_high')}
-
+        if not res_out.has_section('number_of_points'):
+            res_out.add_section('number_of_points')
         res_out['number_of_points'] = {'#Error clipping comparison\n'
                                   'pixelplot': pp.no_points_cut,
                                   'convolution': conv.no_cut_points}
 
-
-        with open(results_ini, 'w') as configfile:
+        with open(results_ini, 'w+') as configfile:
             res_out.write(configfile)
 
     def __ds9_map(self, pp):
