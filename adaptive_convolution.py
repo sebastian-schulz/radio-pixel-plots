@@ -2,6 +2,8 @@ import numpy as np
 import math as m
 
 
+# This class convolves a 2d image (array/ndarray ...) with a gaussian or exponential kernel
+# the kernel can be made 'adaptive' i.e. it depends on the value of the pixel in the image
 class AdaptiveConvolution:
     def __init__(self, map, k, exp, l_0, sigma_0, method='round_gauss'):
         # k is kernel size, must be odd, n is exponent of the adaptive factor
@@ -10,7 +12,7 @@ class AdaptiveConvolution:
         self.k = k
         self.n = map.shape[0]
         self.m = int(self.n+k-1)
-        # print(self.n, self.k, self.m)
+        # Creating a padded map, currently it will always be 0 filled, const. could be useful later
         self.padded_map = np.zeros((self.m, self.m))
         for i in range(self.m):
             for j in range(self.m):
@@ -19,6 +21,7 @@ class AdaptiveConvolution:
                     self.padded_map[j][i] = map[int(j-(self.k-1)/2)][int(i-(self.k-1)/2)]
         self.conv_map = np.zeros((self.n, self.n))
 
+    # Dynamic defenition of the kernel function, based on 'method' and value of n
     def __make_kernel_function(self, method, l_0, sigma_0, n):
         if method == 'round_gauss':
             if n == 0:
@@ -43,6 +46,8 @@ class AdaptiveConvolution:
                     return m.exp(-m.sqrt((x*x+y*y))/l)
                 return _kernel_function
 
+    # This does the actual convolution; since the kernel is adaptive, there is no simple way to do this
+    # in fourier-space; therefor this done pixel by pixel and is a lot slower then fft-based methods
     def convolve(self):
         for i in range(self.n):
             for j in range(self.n):

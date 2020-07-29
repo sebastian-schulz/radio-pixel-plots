@@ -115,7 +115,7 @@ class Plotting:
 
     def col_map_plt(self, data, fname):
         fig, ax = plt.subplots(1, 1)
-        pcm = ax.pcolormesh(data, cmap='RdBu_r', vmax=np.max(data) ,vmin=0)
+        pcm = ax.pcolormesh(data, cmap='RdBu_r', vmax=np.max(data), vmin=0)
         fig.colorbar(pcm, ax=ax, extend='both')
         plt.savefig(fname, dpi=500)
         plt.clf()
@@ -378,7 +378,7 @@ class Plotting:
                           str(pp.px_per_box * pp.config.getint('values', 'n_boxes')) + ' ' +
                           str(pp.px_per_box * pp.config.getint('values', 'n_boxes')) +
                           ' # color=yellow" ' +
-                          ' -zoom to fit -scale mode 90  -saveimage png ' +
+                          ' -zoom to fit -scale mode 95  -saveimage png ' +
                           oname + ' -quit')
             os.system(cmd)
             #print(cmd.rstrip(' -quit'))

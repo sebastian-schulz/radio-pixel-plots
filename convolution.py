@@ -26,7 +26,8 @@ class Convolution:
         self.distance = pp.config.getfloat('values', 'distance')
 
     def run(self):
-        self.__fit_sigma()
+        self.__fit_sigma()  # This does the actual fitting, done with optimize.fsolve
+        # Create full resolution convolved sfr maps for high/low and safe them as fits
         self.data_sfr_conv_low = self.__convolve_gauss(self.sigma_low)
         self.data_sfr_conv_high = self.__convolve_gauss(self.sigma_high)
         hdul = fits.open(self.pp.config.get('names', 'sfr'))
