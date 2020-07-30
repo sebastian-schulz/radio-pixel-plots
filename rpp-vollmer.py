@@ -25,13 +25,13 @@ if not os.path.isdir('./vollmer'):
     os.mkdir('./vollmer')
 os.chdir('./vollmer')
 
-compare_high = Vollmer(create_pp, 'high')
-compare_low = Vollmer(create_pp, 'low')
 #for i in [3,5,7,9,11,13,15,17,19,21]:
 # default kernel size is 13, set in vollmer.py
+compare_low = Vollmer(create_pp, 'low')
 compare_low.run(kernel_type='round_exp')  # round_exp, round_gauss, elliptical not yet implemented
 compare_low.run(kernel_type='round_gauss')
 
+compare_high = Vollmer(create_pp, 'high')
 compare_high.run(kernel_type='round_exp')
 compare_high.run(kernel_type='round_gauss')
 

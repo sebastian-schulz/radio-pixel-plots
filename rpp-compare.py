@@ -23,6 +23,7 @@ datafiles.sort()
 # starting with column descriptions
 for i in range(len(datafiles)):
     print(datafiles[i])
+
 outfile = open(parent + '/comparison.dat', 'w')
 outfile.write('Galaxy name\t' +
               'low\t' +
