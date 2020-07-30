@@ -23,7 +23,7 @@ class Vollmer:
             self.radio_pixels = self.pp.pixel_low_cut  # Not used yet
         self.sfr_map = self.pp.pixel_sfr_2d
         self.case = case
-        print('Using' + self.case + 'radio data as comparison.')
+        print('Using ' + self.case + 'radio data as comparison.')
 
     def run(self, kernel_type):
         self.l1, self.log_phi1 = self.convolve(kernel_type, n=0)
@@ -35,12 +35,12 @@ class Vollmer:
         print('Running smoothing experiment with ' + kernel_type + ' kernel and n = ', str(n))
         phi = []
         l = []
-        for i in np.arange(0.1, 8.1, 0.1):
+        for i in np.arange(0.1, 6.6, 0.1):
             adaptive_conv = AdaptiveConvolution(self.sfr_map, k=k, exp=n, l_0=i, sigma_0=8e-3, method=kernel_type)
             adaptive_conv.convolve()
             sfr_conv = adaptive_conv.conv_map
             l.append(i)
-            print('l =\t', str(i))
+            #print('l =\t', str(i))
             phi.append(self.__calc_phi(self.radio_map, sfr_conv))
         log_phi = []
         for i in range(len(phi)):

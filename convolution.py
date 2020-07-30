@@ -47,7 +47,7 @@ class Convolution:
                                              maxfev=15)  # max. no. of iterations
         self.sigma_low = self.optimal_l_low[0]
         # Diffusion length is the FWHM/2 of the final image, FWHM are square added first
-        self.optimal_l_low[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_low[0], 2) + m.pow(1.2, 2)) / 2.
+        self.optimal_l_low[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_low[0], 2)) / 2.  # - m.pow(1.2, 2)
         print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_l_low[0], 'kpc')
 
         self.optimal_l_high = optimize.fsolve(self.__fct_gauss_fit,
@@ -55,7 +55,7 @@ class Convolution:
                                               args=(self.pp, True),
                                               maxfev=15)
         self.sigma_high = self.optimal_l_high[0]
-        self.optimal_l_high[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_high[0], 2) + m.pow(1.2, 2)) / 2.
+        self.optimal_l_high[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_high[0], 2)) / 2.  # - m.pow(1.2, 2)
         print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_l_high[0], 'kpc')
 
     def __fct_gauss_fit(self, sigma, pp, is_high):
