@@ -24,7 +24,7 @@ datafiles.sort()
 for i in range(len(datafiles)):
     print(datafiles[i])
 
-outfile = open(parent + '/comparison.dat', 'w')
+outfile = open(parent + '/combined_results.dat', 'w')
 outfile.write('Galaxy name\t' +
               'low\t' +
               'a \t' +
@@ -32,14 +32,14 @@ outfile.write('Galaxy name\t' +
               'b \t' +
               'b_err\t' +
               'chi_sqr\t' +
+              'l low\t' +
+              'a err\t' +
               'high\t' +
               'a\t' +
               'a_err\t' +
               'b\t' +
               'b_err\t' +
               'chi_sqr\t' +
-              'l low\t' +
-              'a err\t' +
               'l high\t' +
               'a err\n')
 
@@ -55,13 +55,13 @@ for item in datafiles:
                   '%.2f' % float(config['Low_freq_fit']['b']) + '\t' +
                   '%.2f' % float(config['Low_freq_fit']['b_err']) + '\t' +
                   '%.2f' % float(config['Low_freq_fit']['chi_sqr']) + '\t' +
+                  '%.2f' % float(config['Conv_results']['sigma_l']) + '\t' +
+                  '%.2f' % float(config['Conv_results']['a_err_l']) + '\t' +
                   '%.2f' % float(config['frequencies']['freq_high']) + '\t' +
                   '%.2f' % float(config['High_freq_fit']['a']) + '\t' +
                   '%.2f' % float(config['High_freq_fit']['a_err']) + '\t' +
                   '%.2f' % float(config['High_freq_fit']['b']) + '\t' +
                   '%.2f' % float(config['High_freq_fit']['b_err']) + '\t' +
                   '%.2f' % float(config['High_freq_fit']['chi_sqr']) + '\t' +
-                  '%.2f' % float(config['Conv_results']['sigma_l']) + '\t' +
-                  '%.2f' % float(config['Conv_results']['a_err_l']) + '\t' +
                   '%.2f' % float(config['Conv_results']['sigma_h']) + '\t' +
                   '%.2f' % float(config['Conv_results']['a_err_h']) + '\n')

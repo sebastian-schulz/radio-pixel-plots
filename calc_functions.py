@@ -4,6 +4,7 @@ import numpy as np
 import math as m
 # Library to perform linear regression (with x and y errors!)
 from scipy import odr
+import scipy.optimize as opt
 
 
 # PASSED BUGTEST (July 2018), gives the same results as DS9 with the same boxes
@@ -149,14 +150,18 @@ def fit_odr(val_x, val_y, val_x_err=None, val_y_err=None):
 
     myodr = odr.ODR(mydata, linear, beta0=[1., 0.])
     outodr = myodr.run()
-
+    def fc(x, a, b):
+        return x*a+b
+    linreg = 0 #opt.curve_fit(fc, val_log_x, val_log_y)
+#    linreg_err = np.sqrt(np.diag(linreg[1]))
     # Print results to screen and then return all the relevant data (values, std errors and chi squared)
     print('########## FIT RESULTS ###########')
-    print('a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0])
-    print('b =\t', '%0.3f' % outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1])
+    print('ODR:    a =\t', '%0.3f' % outodr.beta[0], '+/-\t', '%0.3f' % outodr.sd_beta[0])
+#    print('LinReg: a =\t', '%0.3f' % linreg[0][0], '+/-\t', '%0.3f' % linreg_err[0])
+    print('        b =\t', '%0.3f' % outodr.beta[1], '+/-\t', '%0.3f' % outodr.sd_beta[1])
     print('Chi squared = \t', '%0.3f' % outodr.sum_square)
 
-    return [outodr.beta[0], outodr.sd_beta[0]], [outodr.beta[1], outodr.sd_beta[1]], outodr.sum_square
+    return [outodr.beta[0], outodr.sd_beta[0]], [outodr.beta[1], outodr.sd_beta[1]], outodr.sum_square, linreg
 
 
 # Linear model for ODR-fit

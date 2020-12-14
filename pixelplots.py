@@ -179,12 +179,12 @@ class Pixelplots:
                                         self.config.getfloat('values', 'freq_high'))
 
     def __make_fit(self):
-        self.fit_low_a, self.fit_low_b, self.fit_low_chi = fit_odr(self.pixel_sfr_fit[0],
+        self.fit_low_a, self.fit_low_b, self.fit_low_chi, _ = fit_odr(self.pixel_sfr_fit[0],
                                                                    self.pixel_low_fit[2],
                                                                    self.pixel_sfr_fit[1],
                                                                    self.pixel_low_fit[3])
 
-        self.fit_high_a, self.fit_high_b, self.fit_high_chi = fit_odr(self.pixel_sfr_fit[0],
+        self.fit_high_a, self.fit_high_b, self.fit_high_chi, _ = fit_odr(self.pixel_sfr_fit[0],
                                                                       self.pixel_high_fit[2],
                                                                       self.pixel_sfr_fit[1],
                                                                       self.pixel_high_fit[3])

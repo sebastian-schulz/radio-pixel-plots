@@ -4,15 +4,18 @@ import matplotlib.pyplot as plt
 # Mighty numerical library of ptyhon
 import numpy as np
 # For LateX fonts and symbols in plots
-from matplotlib import rc
+from matplotlib import rc, rcParams
 import os
 from calc_functions import fct_f, fct_result
 
+
+hi=3
+wi=4.5
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
-rc('font',**{'family':'serif','serif':['T1']})# T1 is the LaTex standard font, also used by scr familiy documents as default
+rc('font',**{'family':'serif','serif':['T1'],'size': 8})# T1 is the LaTex standard font, also used by scr familiy documents as default
 rc('text', usetex=True)
-
+rcParams.update({'figure.autolayout': True})
 
 class Plotting:
     def __init__(self, pp, conv):
@@ -40,8 +43,8 @@ class Plotting:
                      self.pp.pixel_sfr_cut[0],
                      self.pp.pixel_low_cut[2],
                      self.pp.alpha_cut,
-                     self.pp.fit_low_a[0],
-                     self.pp.fit_low_b[0],
+                     self.pp.fit_low_a,
+                     self.pp.fit_low_b,
                     'low',
                      x_err=self.pp.pixel_sfr_cut[1],
                      y_err=self.pp.pixel_low_cut[3])
@@ -49,8 +52,8 @@ class Plotting:
                      self.pp.pixel_sfr_cut[0],
                      self.pp.pixel_high_cut[2],
                      self.pp.alpha_cut,
-                     self.pp.fit_high_a[0],
-                     self.pp.fit_high_b[0],
+                     self.pp.fit_high_a,
+                     self.pp.fit_high_b,
                     'high',
                      x_err=self.pp.pixel_sfr_cut[1],
                      y_err=self.pp.pixel_high_cut[3])
@@ -59,8 +62,8 @@ class Plotting:
                      self.conv.pixel_sfr_conv_cut_low[0],
                      self.conv.pixel_low_conv_cut_low[2],
                      self.conv.alpha_conv_cut_low,
-                     self.conv.fit_low_conv_a[0],
-                     self.conv.fit_low_conv_b[0],
+                     self.conv.fit_low_conv_a,
+                     self.conv.fit_low_conv_b,
                     'conv_low',
                      sigma= self.conv.optimal_l_low[0],
                      x_err=self.conv.pixel_sfr_conv_cut_low[1],
@@ -69,8 +72,8 @@ class Plotting:
                      self.conv.pixel_sfr_conv_cut_high[0],
                      self.conv.pixel_high_conv_cut_high[2],
                      self.conv.alpha_conv_cut_high,
-                     self.conv.fit_high_conv_a[0],
-                     self.conv.fit_high_conv_b[0],
+                     self.conv.fit_high_conv_a,
+                     self.conv.fit_high_conv_b,
                     'conv_high',
                      sigma=self.conv.optimal_l_high[0],
                      x_err=self.conv.pixel_sfr_conv_cut_high[1],
@@ -245,7 +248,7 @@ class Plotting:
                 val_outlier_y_err.append(y_err[i])
 
         # Create the plot:
-        t = np.linspace(1e-5, 1e-1)  # datapoints in the plotting range
+        t = np.linspace(1e-10, 1e-0)  # datapoints in the plotting range
         plt.clf()  # clear pervious plots
 
         # defining labels
@@ -253,19 +256,22 @@ class Plotting:
         l2 = pp.config.get('boundaries', 'med') + r'$\,> {\alpha}>\,$' + pp.config.get('boundaries', 'high')
         l3 = pp.config.get('boundaries', 'low') + r'$\,> {\alpha}>\,$' + pp.config.get('boundaries', 'med')
         l6 = r'{Outliers}'
-        l4 = '{Condon}'
-        l5 = r'{Least Square Fit}'
+        l4 = r'{Condon--relation}'
+        l5 = r'ODR fit $a=\,$'+ f'{a[0]:.2f}'+ r'$\,\pm\,$' + f'{a[1]:.2f}'
 
+        point_size = 3
+        error_line_width = 0.45
+        plt.gcf().set_size_inches(wi,hi)
         ax = plt.subplot(111)
         # double-logarithmic plots with advanced options (color, marker, ...)
-        ax.errorbar(val_steep_x, val_steep_y, xerr=val_steep_x_err, yerr=val_steep_y_err, marker='.', linestyle='None',
+        ax.errorbar(val_steep_x, val_steep_y, xerr=val_steep_x_err, yerr=val_steep_y_err, marker='^', ms=point_size, elinewidth=error_line_width, linestyle='None',
                     color='b', label=l1)
-        ax.errorbar(val_med_x, val_med_y, xerr=val_med_x_err, yerr=val_med_x_err, marker='.', linestyle='None',
+        ax.errorbar(val_med_x, val_med_y, xerr=val_med_x_err, yerr=val_med_x_err, marker='o', ms=point_size, elinewidth=error_line_width, linestyle='None',
                     color='g', label=l2)
-        ax.errorbar(val_flat_x, val_flat_y, xerr=val_flat_x_err, yerr=val_flat_y_err, marker='.', linestyle='None',
+        ax.errorbar(val_flat_x, val_flat_y, xerr=val_flat_x_err, yerr=val_flat_y_err, marker='v', ms=point_size, elinewidth=error_line_width, linestyle='None',
                     color='r', label=l3)
         ax.plot(t, fct_f(t), linestyle='--', label=l4)
-        ax.plot(t, fct_result(t, a, b), linestyle='-', label=l5)
+        ax.plot(t, fct_result(t, a[0], b[0]), linestyle='-', label=l5)
         ax.errorbar(val_outlier_x, val_outlier_y, xerr=val_outlier_x_err, yerr=val_outlier_y_err, marker='.',
                     linestyle='None', color='tab:gray', label=l6)
 
@@ -277,10 +283,11 @@ class Plotting:
         ax.set_yscale("log", nonposy='clip')
 
         ax.grid(True)
-        ax.set_ylabel(r'{$\left(\Sigma_{SFR}\right) _{RC}$ in M$_{Sun}$ yr$^{-1}$ kpc$^{-2}$}')
-        ax.set_xlabel(r'{$\left(\Sigma_{SFR}\right) _{hyb}$ in M$_{Sun}$ yr$^{-1}$ kpc$^{-2}$}')
-        # plt.xlim(1e-4,1e-1)
-        # plt.ylim(1e-4,1e-1)
+        ax.set_ylabel(r'{$\left(\Sigma_{\mbox{SFR}}\right) _{\mbox{RC}}$ in M$_{\odot}$ yr$^{-1}$ kpc$^{-2}$}')
+        ax.set_xlabel(r'{$\left(\Sigma_{\mbox{SFR}}\right) _{\mbox{hyb}}$ in M$_{\odot}$ yr$^{-1}$ kpc$^{-2}$}')
+        scale=2.5
+        ax.set_xlim(min(val_x)/scale, max(val_x)*scale)
+        ax.set_ylim(min(val_y)/scale, max(val_y)*scale)
         # Save plots as pdf
         if (case == 'high' or case == 'low'):
             outfile = pp.config.get('names', case).rstrip('.fits') + '_pixel.pdf'
@@ -291,16 +298,18 @@ class Plotting:
 
         if (case == 'conv_low'):
             title = pp.config.get('names',
-                            'galaxy') + r' with Gaussian kernel, $l_{CRE} = $' + '%0.2f' % sigma + r' kpc , @' + pp.config.get(
-                'values', 'freq_low') + r' MHz'
+                            'galaxy') +r' @' +\
+                            pp.config.get('values', 'freq_low') +\
+                            r' MHz' + r' convolved with a Gaussian ($l_{\mbox{CRE}} = $' + '%0.2f' % sigma + r' kpc)'
         elif (case == 'conv_high'):
             title = pp.config.get('names',
-                            'galaxy') + r' with Gaussian kernel, $l_{CRE} = $' + '%0.2f' % sigma + r' kpc, @' + pp.config.get(
-                'values', 'freq_high') + r' MHz'
+                            'galaxy') + r' @' + \
+                            pp.config.get('values', 'freq_high') + \
+                            r' MHz' + r' convolved with a Gaussian ($l_{\mbox{CRE}} = $' + '%0.2f' % sigma + r' kpc)'
         elif (case == 'low'):
-            title = pp.config.get('names', 'galaxy') + r', @' + pp.config.get('values', 'freq_low') + r' MHz'
+            title = pp.config.get('names', 'galaxy') + r' @' + pp.config.get('values', 'freq_low') + r' MHz'
         elif (case == 'high'):
-            title = pp.config.get('names', 'galaxy') + r', @' + pp.config.get('values', 'freq_high') + r' MHz'
+            title = pp.config.get('names', 'galaxy') + r' @' + pp.config.get('values', 'freq_high') + r' MHz'
 
         ax.set_title(title)
         plt.savefig(outfile)

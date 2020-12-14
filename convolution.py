@@ -46,7 +46,7 @@ class Convolution:
                                              args=(self.pp, False),  # additional arguments
                                              maxfev=15)  # max. no. of iterations
         self.sigma_low = self.optimal_l_low[0]
-        # Diffusion length is the FWHM/2 of the final image, FWHM are square added first
+        # Diffusion length is the FWHM/2 of the final image
         self.optimal_l_low[0] = m.sqrt(m.pow(2.3548 * self.optimal_l_low[0], 2)) / 2.  # - m.pow(1.2, 2)
         print('Final value for Diffusion length:\t', '%0.3f' % self.optimal_l_low[0], 'kpc')
 
@@ -112,7 +112,7 @@ class Convolution:
                                             pp.config.getfloat('values', 'freq_low'))
 
         if is_high:
-            self.fit_high_conv_a, self.fit_high_conv_b, _ = fit_odr(pixel_sfr_conv_cut[0], pixel_high_conv_cut[2], val_x_err=pixel_sfr_conv_cut[1],
+            self.fit_high_conv_a, self.fit_high_conv_b, _, _ = fit_odr(pixel_sfr_conv_cut[0], pixel_high_conv_cut[2], val_x_err=pixel_sfr_conv_cut[1],
                                         val_y_err=pixel_high_conv_cut[3])
             self.pixel_sfr_conv_cut_high = pixel_sfr_conv_cut
             self.pixel_high_conv_cut_high = pixel_high_conv_cut
@@ -121,7 +121,7 @@ class Convolution:
             return self.fit_high_conv_a[0]
 
         elif not is_high:
-            self.fit_low_conv_a, self.fit_low_conv_b, _ = fit_odr(pixel_sfr_conv_cut[0], pixel_low_conv_cut[2], val_x_err=pixel_sfr_conv_cut[1],
+            self.fit_low_conv_a, self.fit_low_conv_b, _, _ = fit_odr(pixel_sfr_conv_cut[0], pixel_low_conv_cut[2], val_x_err=pixel_sfr_conv_cut[1],
                                       val_y_err=pixel_low_conv_cut[3])
             self.pixel_sfr_conv_cut_low = pixel_sfr_conv_cut
             self.pixel_high_conv_cut_low = pixel_high_conv_cut
